@@ -1,0 +1,96 @@
+<div class="gsi-edit-trigger border-danger d-none" #editSummerCampInfoTrigger>
+    <button class="btn btn-danger py-3 px-4">
+        <span class="d-flex" (click)="openModal()">
+            <goddard-icons [iconClass]="['mr-2']" [iconName]="['Edit-White']" [iconSize]="[16]">
+            </goddard-icons>
+            <span>
+                {{"Edit" | localize}}
+            </span>
+        </span>
+    </button>
+</div>
+<!--Editing Trigger-->
+
+<div appBsModal #editSummerCampInfoModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-dialog-centered  modal-lg">
+        <div class="modal-content">
+            <form #summerCampInfoForm="ngForm" novalidate *ngIf="summerCampInfo">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{"Summer Camp Main Info" | localize}}
+                    </h5>
+                    <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="close()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-12 ">
+                            <label>
+                                {{"Headline" | localize}}
+                            </label>
+                            <input type="text" id="headLine" name="headLine" #headLine="ngModel"
+                                class="form-control form-control-solid" placeholder="Enter HeadLine" [required]="true"
+                                [ngModel]="summerCampInfo?.headLine"
+                                (ngModelChange)="summerCampInfo ? summerCampInfo.headLine=$event : null" />
+                            <validation-messages [formCtrl]="headLine"></validation-messages>
+                        </div>
+                        <div class="form-group col-12">
+                            <div class="form-group">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <label
+                                        for="description">{{"Description" | localize}}
+                                        <span class="text-secondary">*</span>
+                                    </label>
+                                </div>
+                                <div class="d-flex flex-row-reverse py-3">
+                                    <small>
+                                        {{ maxDescriptionLength - summerCampInfo.description?.length}} {{'Characters
+                                        remaining' | localize}}
+                                    </small>
+                                </div>
+                                <textarea rows="5" id="description" name="description" #description="ngModel"
+                                    [ngModel]="summerCampInfo?.description"
+                                    (ngModelChange)="summerCampInfo ? summerCampInfo.description=$event : null" required
+                                    maxlength="{{maxDescriptionLength}}" class="form-control form-control-solid">
+                                </textarea>
+
+                                <!-- <p-editor id="description" name="description" #description="ngModel" placeholder=""
+                                    maxlength="{{maxDescriptionLength}}" [ngModel]="summerCampInfo?.description"
+                                    (ngModelChange)="summerCampInfo ? summerCampInfo.description=$event : null"
+                                    [style]="{'height':'120px'}" validateRequired trimStartToValidateRequired="<p>"
+                                    trimEndToValidateRequired="</p>"
+                                    (focusout)="summerCampInfoForm.form.controls['description'].markAllAsTouched()"
+                                    (onTextChange)="onDescriptionChange($event)">
+                                    <ng-template pTemplate="header">
+                                        <span class="ql-formats">
+                                            <button type="button" class="ql-bold" aria-label="Bold"></button>
+                                            <button type="button" class="ql-italic" aria-label="Italic"></button>
+                                        </span>
+                                    </ng-template>
+                                </p-editor> -->
+
+                                <validation-messages [formCtrl]="description"></validation-messages>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-center">
+                    <button type="button" class="btn btn-light-primary" (click)="closeOrShowDiscardWarning()">
+                        {{"Cancel" | localize}}
+                    </button>
+                    <app-save-button text="Save & Publish" (onClickEvent)="saveSummerCampInfo()" #saveButton>
+                    </app-save-button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!--Edit summer Camp Info Modal -->
+
+<goddard-confirmation-modal #discardChangesModal
+    (accept)="discardChanges()"
+    (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true">
+</goddard-confirmation-modal>
+<!--Discard Modal -->

@@ -1,0 +1,70 @@
+﻿<div bsModal #createOrEditModal="bs-modal" class="modal fade" tabindex="-1" role="dialog"
+    aria-labelledby="createOrEditModal" aria-hidden="true" [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form *ngIf="active" #insightForm="ngForm" novalidate (ngSubmit)="save()" autocomplete="off">
+                <div class="modal-header">
+                    <h4 class="modal-title">
+                        <span *ngIf="insight.id">{{l("EditInsight")}}</span>
+                        <span *ngIf="!insight.id">{{l("CreateNewInsight")}}</span>
+                    </h4>
+                    <button type="button" class="close" (click)="close()" aria-label="Close" [disabled]="saving"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-group">
+                        <div class="d-flex justify-content-between">
+                            <label class="gsi-form-label gsi-required-field text-uppercase" for="Insight_Header ">{{l("Header")}}</label>
+                            <div class="d-flex flex-row-reverse py-3">
+                                <small>
+                                    {{ remainingHeaderCharacters() }} {{'Characters remaining' | localize}}
+                                </small>
+                            </div>
+                        </div>
+                        <input type="text" #Insight_Header="ngModel" id="Insight_Header" class="form-control form-control-solid"
+                            [(ngModel)]="insight.header" name="Header" required maxlength="{{maxHeaderLength}}" />
+                        <validation-messages [formCtrl]="Insight_Header"></validation-messages>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="d-flex justify-content-between">
+                            <label class="gsi-form-label gsi-required-field " for="Insight_Body">{{l("Body")}}</label>
+                            <div class="d-flex flex-row-reverse py-3">
+                                <small>
+                                    {{ remainingBodyCharacters() }} {{'Characters remaining' | localize}}
+                                </small>
+                            </div>
+                        </div>
+
+                        <input type="text" #Insight_Body="ngModel" id="Insight_Body" class="form-control form-control-solid"
+                            [(ngModel)]="insight.body" name="Body" required maxlength="{{maxBodyLength}}" />
+                        <validation-messages [formCtrl]="Insight_Body"></validation-messages>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="gsi-form-label gsi-required-field" for="Insight_Url">{{l("Url")}}</label>
+                        <input type="text" #Insight_Url="ngModel" id="Insight_Url" class="form-control form-control-solid"
+                            [(ngModel)]="insight.url" name="Url" validateURI />
+                        <validation-messages [formCtrl]="Insight_Url"></validation-messages>
+                    </div>
+
+                    <div class="form-group col-6" *ngIf="insight.id">
+                        <label class="gsi-form-label gsi-required-field " for="Insight_SortOrder">{{l("Order Number")}}</label>
+                        <input type="text" #Insight_SortOrder="ngModel" id="Insight_SortOrder" class="form-control form-control-solid"
+                            [(ngModel)]="insight.sortOrder" name="SortOrder" required />
+                        <validation-messages [formCtrl]="Insight_SortOrder"></validation-messages>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button [disabled]="saving" type="button" class="btn btn-default"
+                        (click)="close()">{{l("Cancel")}}</button>
+                    <button type="submit" class="btn btn-primary blue" [disabled]="!insightForm.form.valid"
+                        [buttonBusy]="saving" [busyText]="l('SavingWithThreeDot')"><i class="fa fa-save"></i>
+                        <span>{{l("Save")}}</span></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,52 @@
+<div appBsModal #sortFacultyMemberModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-dialog-centered  modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {{"Sort Faculty Bios" | localize}}
+                </h5>
+                <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="showDiscardChangesModal()"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p-table class="gsi-table gsi-table_sortable" [value]="_facultyMembers" [reorderableColumns]="true"
+                    (onRowReorder)="onReorderFacultyMember($event)">
+                    <ng-template pTemplate="body" let-facultyBio let-index="rowIndex">
+                        <tr [pReorderableRow]="index">
+                            <td class="text-center">
+                                <img class="gsi-list-drag-icon"
+                                    src="/assets/metronic/themes/theme7/images/gsi_drag_icon.svg" pReorderableRowHandle>
+                            </td>
+                            <td class="w-100">
+                                <span class="p-column-title">{{"Name / Position" | localize}}</span>
+                                {{facultyBio.givenName}}
+                                <br>
+                                <small>
+                                    {{facultyBio.jobTitle}}
+                                </small>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-tertiary" [attr.aria-label]="l('Close')"
+                    (click)="showDiscardChangesModal()">
+                    {{"Cancel" | localize}}
+                </button>
+                <app-save-button text="Save" (onClickEvent)="saveFacultyMembers()" #saveButton>
+                </app-save-button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Edit Faculty Member Modal -->
+
+<goddard-confirmation-modal #discardChangesModal
+    (accept)="discardChanges()"
+    (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true">
+</goddard-confirmation-modal>
+<!--Discard Modal -->
+

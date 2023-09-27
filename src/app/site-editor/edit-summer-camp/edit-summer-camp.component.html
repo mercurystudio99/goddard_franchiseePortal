@@ -1,0 +1,16 @@
+<div [@routerTransition]>
+    <div class="gsi-preview-container container px-0 mt-5">
+        <div class="position-relative">
+
+            <app-page-preview pageId="SummerCampPage" #pagePreview (iframeIsResized)="setEditors($event)">
+            </app-page-preview>
+
+            <app-edit-summer-camp-info #editSummerCampInfoModal (save)="onSaveSummerCamp($event)">
+            </app-edit-summer-camp-info>
+
+            <app-edit-summer-camp-events #editSummerCampEventsModal (save)="onSaveSummerCamp($event)">
+            </app-edit-summer-camp-events>
+
+        </div>
+    </div>
+</div>

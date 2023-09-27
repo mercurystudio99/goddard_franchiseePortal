@@ -1,0 +1,146 @@
+<div class="gsi-edit-trigger border-danger d-none" #editCardsTrigger>
+    <button class="btn btn-danger py-3 px-4" (click)="openEditModal()">
+        <span class="d-flex">
+            <goddard-icons [iconClass]="['mr-2']" [iconName]="['Edit-White']" [iconSize]="[16]">
+            </goddard-icons>
+            <span>
+                {{"Edit" | localize}}
+            </span>
+        </span>
+    </button>
+</div>
+
+<!--Editing Trigger-->
+<div appBsModal #editCardModal="bs-modal" class="modal modal-carousel fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-dialog-centered  modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <span>{{"Edit Content" | localize}}</span>
+                    <goddard-tooltip [toolTipPath]="tooltips.HOMEPAGE_ICON_CARD_EDITOR"></goddard-tooltip>
+                </h5>
+                <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="close()"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row justify-content-center p-4">
+                    <div class="col-12">
+                        <p class="h5 font-ramona text-primary">
+                            {{"Selected Cards" | localize}}
+                        </p>
+                    </div>
+                    <div class="col-12 mb-5">
+                        <div
+                            class="rounded goddard-bg-cotton-candy gsi-home-page-cards d-flex w-100 justify-content-center align-items-stretch py-3">
+                            <ng-container *ngFor="let card of selectedIconCards; let i = index">
+                                <!--SELECTED CARD TEMPLATES-->
+                                <div class="col-3 px-2 d-flex align-items-stretch" pDroppable="availableIconCards"
+                                    (onDrop)="dropNewCard(i)" [attr.data-card-spot]="i">
+                                    <div class="gsi-drop-zone-card d-flex align-items-stretch rounded border-dashed-primary w-100"
+                                        pDroppable="selectedIconCards" (onDrop)="dropSortCards(i)"
+                                        [attr.data-card-spot]="i">
+                                        <div class="gsi-drop-card h-100 w-100 d-flex align-items-center flex-column text-center bg-white p-4 border border-dark rounded"
+                                            *ngIf="card" [attr.data-card-id]="card.alternateName"
+                                            pDraggable="selectedIconCards" (onDragStart)="dragStart($event, card)"
+                                            (onDragEnd)="dragEnd($event, card)">
+                                            <div class="d-flex flex-column justify-content-center align-items-center">
+                                                <img class="gsi-drop-card_image mb-2" [src]="card.imageReference">
+                                                <p class="gsi-drop-card_title text-primary font-ramona mb-2">
+                                                    {{card.header}}</p>
+                                                <div class="gsi-drop-card_copy gsi-card-icon_copy mb-0"> <small
+                                                        [innerHTML]="card.description"></small></div>
+                                            </div>
+                                            <p class="mt-auto d-flex mb-0">
+                                                <img class="gsi-link-icon small mr-2"
+                                                    src="/assets/metronic/themes/theme7/images/icon-circle-right-blue.svg">
+                                                <small
+                                                    class="gsi-drop-card_link d-block text-tertiary font-ramona text-nowrap">
+                                                    {{ card.linkText }}
+                                                </small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--END SELECTED CARD TEMPLATES-->
+                            </ng-container>
+                        </div>
+                    </div>
+                    <!--DROP ZONES-->
+                    <div class="col-12 pb-5">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-1 text-right">
+                                <i class="text-muted fa fa-arrow-up pr-2"></i>
+                            </div>
+                            <div class="col-10">
+                                <span class="w-100 d-inline-block border-dashed-top"></span>
+                            </div>
+                            <div class="col-1">
+                                <i class="text-muted fa fa-arrow-up pl-2"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 ">
+                        <p class="h5 font-ramona  text-primary">
+                            {{"Available Cards" | localize}}
+                        </p>
+                        <p>
+                            {{l('HomePageCardsIntro')}}
+                        </p>
+                    </div>
+                    <div class="col-12 my-4" *ngIf="availableIconCards">
+                        <p-carousel styleClass="gsi-card-carousel" [value]="availableIconCards"
+                            [numVisible]="maxCarouselCards" [numScroll]="1">
+                            <ng-template let-card pTemplate="item">
+                                <div class="px-3 h-100">
+                                    <div class="gsi-drop-card h-100 w-100 d-flex align-items-center flex-column text-center bg-white p-4 border border-dark rounded"
+                                        [attr.data-card-id]="card.alternateName" pDraggable="availableIconCards"
+                                        (onDragStart)="dragStart($event, card)" (onDragEnd)="dragEnd($event, card)">
+                                        <div class="d-flex flex-column justify-content-center align-items-center">
+                                            <img class="gsi-drop-card_image mb-2" [src]="card.imageReference">
+                                            <p class="gsi-drop-card_title text-primary font-ramona mb-2">
+                                                {{card.header}}</p>
+                                            <div class="gsi-drop-card_copy gsi-card-icon_copy mb-0"> <small
+                                                    [innerHTML]="card.description"></small></div>
+                                        </div>
+                                        <p class="mt-auto d-flex mb-0">
+                                            <img class="gsi-link-icon small mr-2"
+                                                src="/assets/metronic/themes/theme7/images/icon-circle-right-blue.svg">
+                                            <small
+                                                class="gsi-drop-card_link d-block  text-tertiary font-ramona text-nowrap">
+                                                {{ card.linkText }}
+
+                                            </small>
+                                        </p>
+                                    </div>
+                                </div>
+                            </ng-template>
+                        </p-carousel>
+
+                    </div>
+                    <!--DROP CARD CAROUSEL->-->
+
+                    <app-mailto-link mailto="fcp@goddardsystems.com" requestSubject="{{requestSubject}}"
+                        linkText="HomePageImageCardRequest" [cssClasses]="'w-100 d-flex align-items-center'"
+                        #mailToLink>
+                    </app-mailto-link>
+
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-center">
+                <button type="button" class="btn btn-light-primary" (click)="closeOrShowDiscardWarning()">{{"Cancel" |
+                    localize}}</button>
+                <app-save-button text="Save & Publish" (onClickEvent)="saveIconCards()" #saveButton
+                    [disabled]="!pendingChanges()">
+                </app-save-button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<goddard-confirmation-modal #discardChangesModal
+    (accept)="discardChanges()"
+    (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true">
+</goddard-confirmation-modal>
+<!--Discard Modal -->

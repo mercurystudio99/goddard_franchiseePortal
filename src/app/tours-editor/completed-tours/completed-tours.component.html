@@ -1,0 +1,105 @@
+<div class="container pt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        {{"Completed Tours" | localize}}
+                    </h3>
+                </div>
+                <div class="border-bottom border-gray-light px-7 py-3">
+                    <filter-tours [defaultStatus]="_defaultStatus"></filter-tours>
+                </div>
+                <div class="card-body px-5 py-0 position-relative">
+                    <ngx-spinner class="gsi-content-spinner" name="tours-table" type="ball-clip-rotate" size="medium"
+                        color="#987456" template="<div class='gsi-spinner'><span class='gsi-pulse-white'></span></div>">
+                    </ngx-spinner>
+                    <div *ngIf="tours">
+                        <p-table #dataTable class="gsi-table gsi-table--fixed gsi-table-tours gsi-ta"
+                                [value]="tours"
+                                [lazy]="true"
+                                [paginator]="toursCount > maxToursPerPage"
+                                [rows]="maxToursPerPage"
+                                [totalRecords]="toursCount"
+                                (onLazyLoad)="onLazyLoadCompletedTours($event)">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th pSortableColumn="startDateTime">
+                                        {{"Date & Time" | localize }}
+                                        <p-sortIcon field="startDateTime"></p-sortIcon>
+                                    </th>
+                                    <th pSortableColumn="type">
+                                        {{"Tour Type" | localize }}
+                                        <p-sortIcon field="type"></p-sortIcon>
+                                    </th>
+                                    <th pSortableColumn="lead.firstName">
+                                        {{"First Name" | localize }}
+                                        <p-sortIcon field="lead.firstName"></p-sortIcon>
+                                    </th>
+                                    <th pSortableColumn="lead.lastName">
+                                        {{"Last Name" | localize }}
+                                        <p-sortIcon field="lead.lastName"></p-sortIcon>
+                                    </th>
+                                    <th>
+                                        {{"Child Name" |localize }}
+                                    </th>
+                                    <th>
+                                        {{"Child Age" | localize }}
+                                    </th>
+                                    <th pSortableColumn="guide.name">
+                                        {{"Tour Guide" | localize }}
+                                        <p-sortIcon field="guide.name"></p-sortIcon>
+                                    </th>
+                                    <th class="text-right">
+                                    </th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-tour>
+                                <tr>
+                                    <td>
+                                        <span class="p-column-title" data-id="{{tour.id}}"> {{l('startDateTime')}}</span>
+                                        {{ getTourDateTime(tour.startDateTime) }}
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title">{{"tourType" | localize}}</span>
+                                        {{ getTourType(tour.type)}}
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title"> {{"firstName" | localize }}</span>
+                                        {{tour.lead.firstName}}
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title"> {{"lastName" | localize }}</span>
+                                        {{tour.lead.lastName}}
+                                    </td>
+                                    <td [innerHtml]="childrenNames(tour)">
+                                        <span class="p-column-title"> {{"childName" | localize }}</span>
+                                    </td>
+                                    <td [innerHtml]="childrenAges(tour)">
+                                        <span class="p-column-title">{{"childAge" | localize }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title"> {{"tourGuide" | localize }}</span>
+                                        {{tour?.guide?.name}}
+                                    </td>
+                                    <td class="text-right">
+                                        <span class="cursor-pointer text-tertiary font-weight-bold" (click)="clearLeadsSearchAndOpenModal(tour.id)"  type="button">View/Edit</span>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                        <p class="lead text-muted text-center py-5" *ngIf="tours.length == 0 && !filtersAreDefault">
+                            {{"No results match your search criteria" | localize}}
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <edit-tours-modal #editToursModal (save)="onSaveTour($event)" (createLead)="openNewLeadModal()"></edit-tours-modal>
+            <edit-lead-modal #editLeadModal (save)="onSaveLead($event)" (back)="openModal(undefined)"></edit-lead-modal>
+
+        </div>
+    </div>
+</div>

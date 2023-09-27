@@ -1,0 +1,65 @@
+<div class="gsi-edit-trigger border-danger d-none" #editHomeTeaserTrigger>
+    <button class="btn btn-danger py-3 px-4" (click)="openModal()">
+        <span class="d-flex">
+            <goddard-icons [iconClass]="['mr-2']" [iconName]="['Edit-White']" [iconSize]="[16]">
+            </goddard-icons>
+            <span>
+                {{"Edit" | localize}}
+            </span>
+        </span>
+    </button>
+</div>
+<!--Editing Trigger-->
+
+<!--Editing Trigger-->
+<div appBsModal #editTeaserModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-dialog-centered  modal-lg">
+        <div class="modal-content">
+            <form #teaserForm="ngForm" novalidate (ngSubmit)="saveTeaser()">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{"Edit Teaser Content" | localize}}
+                    </h5>
+                    <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="close()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-row justify-content-center">
+                        <div class="form-group col-12 mb-0">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <label>
+                                    {{"Description" | localize}}
+                                </label>
+                                <small class="form-text text-muted">
+                                    {{maxDescriptionLength - textDto?.text?.length}} {{' Characters remaining' | localize}}
+                                </small>
+                            </div>
+                            <textarea rows="5" id="text" name="text" class="form-control form-control-solid gsi-form-control--text"
+                                [innerHtml]="textDto?.text" #text="ngModel" maxlength="{{maxDescriptionLength}}"
+                                validateNoHtml [ngModel]="textDto?.text"
+                                (ngModelChange)="textDto ? textDto.text=$event : null">
+                            </textarea>
+                            <validation-messages [formCtrl]="text"></validation-messages>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-lighter-primary" (click)="showDiscardChangesModal()">
+                        {{"Cancel" | localize}}
+                    </button>
+                    <button type="button" class="btn btn-primary" (click)="saveTeaser()" [disabled]="!teaserForm.form.valid || !teaserForm.form.dirty">
+                        {{"Save" | localize}}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<goddard-confirmation-modal #discardChangesModal
+    (accept)="discardChanges()"
+    (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true">
+</goddard-confirmation-modal>
+<!--Discard Modal -->

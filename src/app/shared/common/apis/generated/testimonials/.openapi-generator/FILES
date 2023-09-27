@@ -1,0 +1,17 @@
+.gitignore
+README.md
+api.module.ts
+api/api.ts
+api/testimonials.service.ts
+configuration.ts
+encoder.ts
+git_push.sh
+index.ts
+model/getUnpublishedTestimonialResult.ts
+model/getUnpublishedTestimonialResultPagedResponse.ts
+model/models.ts
+model/problemDetails.ts
+model/testimonial.ts
+model/testimonialDto.ts
+model/testimonialPagedResponse.ts
+variables.ts

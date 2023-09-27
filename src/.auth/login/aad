@@ -1,0 +1,17 @@
+<html>
+<head>
+</head
+<body>
+<p>
+SSO Token Expired, need to refresh from <a href="https://www-dev.i-goddard.com/.auth/me">https://www-dev.i-goddard.com/.auth/me</a>  And copy the file to ../me (src/.auth/me)
+</p>
+<p>You may need to delete your AppServiceToken cookie</p>
+<p>
+Then navigate back to <a href="/">root</a>
+</p>
+<p>
+  - or - try <a href="/account/login?login=native">native login</a>
+</p>
+</body>
+</html>
+

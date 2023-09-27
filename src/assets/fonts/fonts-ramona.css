@@ -1,0 +1,18 @@
+@font-face {
+    font-family: Ramona;
+    src: url('./Ramona/ramona-bold-webfont.woff2') format('woff2'),
+         url('./Ramona/ramona-bold-webfont.woff') format('woff');
+    font-weight: bold;
+    font-style: bold;
+
+}
+
+
+@font-face {
+    font-family: Ramona;
+    src: url('./Ramona/ramona-light-webfont.woff2') format('woff2'),
+         url('./Ramona/ramona-light-webfont.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}

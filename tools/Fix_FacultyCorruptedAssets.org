@@ -1,0 +1,104 @@
+* Test/QA Version
+#+begin_src python :results output :wrap
+  import csv
+  import urllib.request
+  import json
+  from urllib.error import HTTPError
+
+  ocpApimSubscriptionKey = ''
+  with open('./apim-subscription-key-qa.txt') as secrets:
+      ocpApimSubscriptionKey = secrets.read()
+
+  with open('./FacultyCorruptedAssets.csv', newline='') as csvfile:
+      with open('./FacultyCorruptedAssets_WithUrl.csv', "a") as outfile:
+          dr = csv.DictReader(csvfile, delimiter=',', quotechar='|')
+          for row in dr:
+              eid = row['EmployeeID']
+              req = urllib.request.Request('https://ipaas-prod-useast-apim.azure-api.net/faculty/api/v1/faculty/{id}'.format(id=eid),
+                                           None,
+                                           {'Ocp-Apim-Subscription-Key': ocpApimSubscriptionKey})
+              try:
+                  res = urllib.request.urlopen(req)
+              except(HTTPError):
+                  csvrow = "{a},{b},{c}
+  ".format(a=row['Schoolid'],b=eid,c='')
+                  outfile.write(csvrow)
+                  continue
+              data = res.read()
+              api_data = json.loads(data)
+              csvrow = "{a},{b},{c}
+  ".format(a=row['Schoolid'],b=eid,c=api_data['photoUrl'])
+              outfile.write(csvrow)
+#+end_src
+
+#+RESULTS:
+#+begin_results
+10100761742,10100878117,https://qafmsapi.goddardschool.com/file/12-14-2015_3b95b016-c28e-4ad3-a7f0-3800ff1d441a_Jinmod.jpg
+10100761742,11862737567,https://qafmsapi.goddardschool.com/file/05-23-2017_8cb684af-4d35-4f69-870d-146a6ee74e79_Sharynnemod.jpg
+#+end_results
+
+
+** Test get APIM Subscription key
+
+#+begin_src python
+  ocpApimSubscriptionKey = ''
+  with open('./apim-subscription-key.txt') as secrets:
+      ocpApimSubscriptionKey = secrets.read()
+
+  return ocpApimSubscriptionKey
+#+end_src
+
+#+RESULTS:
+
+* PROD Version
+#+begin_src python :results output :wrap :tangle ./fix-faculty-corrupted-assets.py
+  # Recovery script for retrieving the rendition of a faculty bio asset
+  #
+  # This script requires a .csv of the FacultyCorruptedAssets file
+  # An example looks like:
+  # ./FacultyCorruptedAssets.csv 
+  #  Schoolid,EmployeeID,Filepath
+  #  10100761742,10100878117,
+  #  10100761742,11862737567,
+  #
+  # Then you will also need to aquire an APIM Subscription key to be stored in ./apim-subscription-key.txt
+  # Format of this file is a simple string:
+  # ./apim-subscription-key.txt
+  #  abcdefg
+  # 
+  import csv
+  import urllib.request
+  import json
+  from urllib.error import HTTPError
+
+  ocpApimSubscriptionKey = ''
+  with open('./apim-subscription-key.txt', encoding='utf-8') as secrets:
+      ocpApimSubscriptionKey = secrets.read().replace('\n','')
+
+  with open('./FacultyCorruptedAssets.csv', newline='') as csvfile:
+      with open('./FacultyCorruptedAssets_WithUrl.csv', "a") as outfile:
+          dr = csv.DictReader(csvfile, delimiter=',')
+          for row in dr:
+              eid = row['EmployeeID']
+              req = urllib.request.Request('https://ipaas-prod-useast-apim.azure-api.net/faculty/api/v1/faculty/{id}'.format(id=eid),
+                                           None,
+                                           {'Ocp-Apim-Subscription-Key': ocpApimSubscriptionKey})
+              try:
+                  res = urllib.request.urlopen(req)
+              except(HTTPError):
+                  csvrow = "{a},{b},{c}\n".format(a=row['Schoolid'],b=eid,c='')
+                  outfile.write(csvrow)
+                  continue
+              data = res.read()
+              api_data = json.loads(data)
+              csvrow = "{a},{b},{c}\n".format(a=row['Schoolid'],b=eid,c=api_data['photoUrl'])
+              outfile.write(csvrow)
+#+end_src
+
+#+RESULTS:
+#+begin_results
+#+end_results
+
+#+begin_results 
+
+#+end_results

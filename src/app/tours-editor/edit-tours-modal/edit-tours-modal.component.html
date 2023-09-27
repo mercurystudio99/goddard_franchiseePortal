@@ -1,0 +1,571 @@
+<!--Editing Trigger-->
+<div appBsModal #TourModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-dialog-centered  modal-lg">
+        <div class="modal-content">
+            <form #tourForm="ngForm" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{
+                            (tour?.id ? (isCompleted ? "Completed Tour Details" : "Tour Details") : "Add a Tour") |
+                            localize
+                            }}
+                    </h5>
+                    <button type="button" class="close" [attr.aria-label]="l('Close')"
+                        (click)="showDiscardChangesModal()"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row justify-content-center" #searchTourLeadWrapper *ngIf="!displayTourForm && !editingTour">
+                        <div class="col-6 p-0">
+                            <h6 class="text-primary font-weight-bolder mb-0">
+                                {{"Search Lead Listings" | localize}}
+                            </h6>
+                        </div>
+                        <div class="col-5 d-flex flex-row-reverse align-items-center p-0">
+                            <span>{{"Scheduled Tour" | localize}}</span>
+                            <span class="gsi-table-tours_scheduled-tour-info mr-2"></span>
+                        </div>
+                        <div class="col-12 gsi-autocomplete__wrapper">
+                            <span class="d-block w-100 position-relative">
+                                <p-autoComplete #acInput [(ngModel)]="inputText" name="q" id="q" type="text"
+                                    [suggestions]="leadListingsResults" (completeMethod)="searchLeads($event)"
+                                    (onSelect)="setupTourForm($event.schoolParentLeadId)" (onFocus)="onFocusAc(acInput)"
+                                    inputStyleClass="gsi-autocomplete__input" panelStyleClass="gsi-autocomplete__panel"
+                                    class="gsi-autocomplete d-block my-3 p-0" [minLength]="3"
+                                    placeholder="Search by first or last name, email or phone number"
+                                    showEmptyMessage="true" [emptyMessage]="l('No_Leads_Found_Message')">
+                                    <!-- Headers -->
+                                    <ng-template let-value pTemplate="header">
+                                        <span
+                                            class="gsi-autocomplete__header d-flex no-gutters align-items-center  px-10 py-4">
+                                            <span class="col-4 text-primary">{{"Name" | localize}}</span>
+                                            <span class="col-5 px-3 text-primary">{{"Email / Phone" | localize}}</span>
+                                            <span class="col-3 text-primary">{{"Lead Date" | localize}}</span>
+                                        </span>
+                                    </ng-template>
+                                    <!-- Body Template  -->
+                                    <ng-template let-value pTemplate="item">
+                                        <span
+                                            class="gsi-autocomplete__option row no-gutters mx-10 py-4 align-items-start border-top border-1">
+                                            <span class="col-4 position-relative">
+                                                <div *ngIf="value.hasUpcomingTour" class="gsi-table-tours_scheduled-tour-info mt-1 mx-auto bg-secondary position-absolute"></div>
+                                                {{value.lastName + ', ' + value.firstName}}
+                                            </span>
+                                            <span class="col-5 px-3">
+                                                    <span class="gsi-word-nowrap">{{value.emailAddress}}</span>
+                                                    <br />
+                                                    {{value.mobilePhone}}
+                                            </span>
+                                            <span class="col-3">
+                                                <span *ngIf="value.createdOn else createdOnNull">
+                                                    {{value.createdOn | date: dateFormat }}
+                                                </span>
+                                                <ng-template #createdOnNull>
+                                                    <span>N/A</span>
+                                                </ng-template>
+                                            </span>
+
+
+                                        </span>
+                                    </ng-template>
+                                </p-autoComplete>
+                            </span>
+
+                        </div>
+                        <div class="col-11 p-0 text-right">
+                            <span class="bg-white border-0 gsi-text-blue cursor-pointer" rol="button"
+                                (click)="openNewLeadModal()">
+                                <img _ngcontent-pys-c233=""
+                                    src="/assets/metronic/themes/theme7/images/icon-circle-right-blue.svg"
+                                    class="gsi-link-icon small mr-1">
+                                {{"Create a new lead" | localize}}
+                            </span>
+                        </div>
+                    </div>
+                    <!--Search Tour Lead-->
+
+                    <div class="w-100 d-flex flex-column">
+                        <div class="w-100 mb-3" *ngIf="displayTourForm && !editingTour" #tourFormWrapper>
+                            <span role="button" type="button" class="bg-white border-0 gsi-text-blue cursor-pointer"
+                                [attr.aria-label]="l('Back')" (click)="back()">
+                                <img src="/assets/metronic/themes/theme7/images/icon-circle-right-blue.svg"
+                                    class="gsi-link-icon small mr-2 gsi-flip-x"> {{"Back to Leads Search" | localize}}
+                            </span>
+                        </div>
+
+                        <div class="w-100" *ngIf="displayTourForm">
+
+                            <div *ngIf="editingTour">
+                                <div class="form-row">
+                                    <div class="form-group col-4 mb-4">
+                                        <label for="status">
+                                            {{"Status" | localize}}
+                                        </label>
+                                        <input type="text" class=" form-control form-control-solid disabled" name="status"
+                                            #classRoom="ngModel" placeholder='{{"Status" | localize}}'
+                                            [ngModel]="tour?.status"
+                                            (ngModelChange)="tour ? tour.status=$event : null"
+                                            disabled
+                                            />
+                                    </div>
+                                    <div class="form-group col-4 mb-4">
+                                        <label for="tour-guide" [ngClass]="{'gsi-required-field': tour?.type === inPersonTourType}">
+                                            {{"Tour Guide" | localize}}
+                                        </label>
+                                        <select class="form-control" name="guide-name" [ngModel]="tour?.guideId"
+                                            (ngModelChange)="tour ? tour.guideId=($event ? $event : null) : null"
+                                            [required]="tour?.type === inPersonTourType" #tourGuide="ngModel">
+                                            <option *ngFor="let item of guides" value="{{item.id}}"
+                                                [selected]="tour?.guideId === item.id">
+                                                {{item.name}}
+                                            </option>
+                                        </select>
+                                        <validation-messages [formCtrl]="tourGuide"></validation-messages>
+                                    </div>
+                                    <div class="form-group col-4 mb-4">
+                                        <label for="classroom">
+                                            {{"Classroom" | localize}}
+                                        </label>
+                                        <input type="text" class=" form-control" name="classRoom"
+                                            #classRoom="ngModel" placeholder='{{"Enter Classroom" | localize}}'
+                                            [ngModel]="tour?.classRoom"
+                                            (ngModelChange)="tour ? tour.classRoom=$event : null" />
+                                        <validation-messages [formCtrl]="classRoom"></validation-messages>
+                                    </div>
+                                </div>
+                                <div class="w-100 rounded p-5 bg-gray-medium border border-gray mb-4" *ngIf="editingTour">
+                                    <div class="row justify-content-center mb-4">
+                                      <div class="col-md-6">
+                                            <label class="font-weight-bolder gsi-required-field"
+                                                for="tour-type">
+                                                {{"Tour Type" | localize}}
+                                            </label>
+                                            <select
+                                                class="form-control form-control-sm"
+                                                id="tour-type"
+                                                #tourType="ngModel"
+                                                name="tour-type"
+                                                [ngModel]="tour?.type"
+                                                (ngModelChange)="tour ? tour.type=$event : null" required >
+                                                <option *ngFor="let item of tourTypes"
+                                                    [selected]="tour?.type === item.value"
+                                                    [value]="item.value">
+                                                    {{item.text }}
+                                                </option>
+                                            </select>
+                                            <validation-messages [formCtrl]="tourType"></validation-messages>
+                                        </div>
+                                        <!-- Tour Types -->
+
+                                        <div class="form-group col-lg-6 mb-2">
+                                            <label class="font-ramona text-primary font-weight-bolder mb-0 gsi-required-field"
+                                                for="startingTime">
+                                                {{"Time" | localize}}
+                                            </label>
+                                            <div class="form-control form-control-sm form-control-solid form-control-solid-blue  d-flex align-items-center justify-content-between w-100">
+                                                <p-dropdown [options]="timeFrames"
+                                                    styleClass="form-control-blank"
+                                                    optionLabel="text" optionValue="value"
+                                                    dropdownIcon=""
+                                                    required
+                                                    #startTimeInput="ngModel"
+                                                    name="startTime"
+                                                    [virtualScroll]="true"
+                                                    [virtualScrollItemSize]="30"
+                                                    [(ngModel)]="startTime"
+                                                    (onChange)="onChangeStartTime($event.value)"
+                                                    >
+                                                </p-dropdown>
+                                                <span> - </span>
+                                                <p-dropdown [options]="timeFrames"
+                                                    styleClass="form-control-blank"
+                                                    optionLabel="text" optionValue="value"
+                                                    dropdownIcon=""
+                                                    required
+                                                    #endTimeInput="ngModel"
+                                                    name="endTime"
+                                                    [virtualScroll]="true"
+                                                    [virtualScrollItemSize]="30"
+                                                    [(ngModel)]="endTime"
+                                                    (onChange)="onChangeEndTime($event.value)"
+                                                    >
+                                                </p-dropdown>
+                                            </div>
+                                            <validation-messages [formCtrl]="endTimeInput"></validation-messages>
+                                        </div>
+                                        <!--Rescheduling date-time-->
+                                    </div>
+                                    <div class="justify-content-center w-100 border-top border-gray">
+                                        <tour-schedule #tourSchedule [_tour]="originalTour" [_settings]="_settings"
+                                            (availabilityLoaded)="onTourAvailabilityLoaded($event)"
+                                            (dateChanged)="onChangeDate($event)">
+                                        </tour-schedule>
+                                    </div>
+                                    <!--Schedule tour-->
+                                    <div class="row border-top border-gray pt-4" *ngIf="!isCompleted">
+                                        <div class="col-12 text-right" >
+                                            <button type="button"
+                                                class="btn btn-outline-white btn-sm"
+                                                (click)="showDiscardChangesModal(editActions.NoShow)">
+                                                {{"Cancel Tour" | localize}}
+                                            </button>
+                                            <button type="button"
+                                                class="btn btn-outline-white btn-sm "
+                                                (click)="showDiscardChangesModal(editActions.NoShow)">
+                                                {{"No Show" | localize}}
+                                            </button>
+                                            <button type="button"
+                                                class="btn btn-outline-white btn-sm "
+                                                (click)="showDiscardChangesOrCompletedTourModal()"
+                                                [disabled]="!tourForm.form.valid">
+                                                {{"Mark As Complete" | localize}}
+                                        </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <!--EDIT TOUR MODULE-->
+
+                            <div class="w-100 border border-gray border-1 rounded p-5 mb-4">
+                                <div class="form-row mb-2">
+                                    <div class="form-group col-12 col-lg-6 mb-0">
+                                        <label>
+                                            {{"Parent Information" | localize}}
+                                        </label>
+                                        <div class="ml-6">
+                                            <div class="row">
+                                                <p class="mb-1">{{lead?.firstName + ' ' + lead?.lastName}}</p>
+                                            </div>
+                                            <div class="row">
+                                                <p class="mb-1">{{lead?.emailAddress}}</p>
+                                            </div>
+                                            <div class="row">
+                                                <p class="mb-1">{{lead?.mobilePhone}}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--Parent Information-->
+
+                                    <div class="form-group col-12 col-lg-6 mb-0">
+                                        <div *ngFor="let item of lead?.schoolChildLeads">
+                                            <div class="form-row">
+                                                <div class="form-group col-12 col-lg-6 mb-4 ml-2">
+                                                    <label class="row">
+                                                        {{"Child's Information" | localize}}
+                                                    </label>
+                                                    <div class="row">
+                                                        <p class="mb-1 ml-2">{{item?.firstName}}</p>
+                                                    </div>
+                                                    <div class="row">
+                                                        <p class="mb-1 ml-2">{{item?.dateOfBirth | luxonDateFormat }}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!--children-->
+                                </div>
+                                <!--Parent Information & Child's Information-->
+
+                                <div class="form-row mb-2">
+                                    <div class="form-group col-12 col-lg-6 mb-0">
+                                        <label>
+                                            {{"Contact Preference:" | localize}}
+                                        </label>
+                                        <div class="row">
+                                            <p class="mb-1 ml-5">{{contactPreferenceText(lead?.contactPreference) }}</p>
+                                        </div>
+                                    </div>
+                                    <!--Email-->
+                                    <div class="form-group col-12 col-lg-6 mb-0">
+                                        <label>
+                                            {{"Preferred Start Date:" | localize}}
+                                        </label>
+                                        <div class="row">
+                                            <p class="mb-1 ml-5">{{lead?.startDate | luxonDateFormat }}</p>
+                                        </div>
+                                    </div>
+                                    <!--Phone-->
+                                </div>
+                                <!--Contact Preference & Preferred Start date-->
+
+                                <div class="form-row">
+                                    <div class="form-group mb-0 col-12">
+                                        <label>
+                                            {{"Special Requests" | localize}}
+                                        </label>
+                                        <div class="row">
+                                            <p class="mb-1 ml-5">{{lead?.additionalRemarks }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--Lead's Special Request-->
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-12">
+                                    <p class="text-primary font-weight-bolder mb-2">
+                                        {{"Programs of Interest" | localize}}
+                                    </p>
+                                    <div class="gsi-tour-edit__programs-wrapper form-box w-100 w-100 d-flex flex-wrap pb-0 ">
+                                            <label class="checkbox checkbox-lg col-6 col-lg-4 col-xl-3 mb-5"
+                                            *ngFor="let option of leadProgramOfInterestOptions">
+                                            <input type="checkbox" name="programsOfInterest-{{option.name}}"
+                                                [checked]="isProgramOfInterestSelected(option.name)"
+                                                programsOfInterest [lead]="lead"
+                                                [programsOfInterestOptions]="programsOfInterestOptions"
+                                                [value]="option.name" />
+                                            <span></span>{{option.displayName | localize}}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Program of Interest-->
+
+                            <div class="form-row">
+                                <div class="form-group col-12">
+                                    <p class="text-primary font-weight-bolder mb-2">
+                                        {{"Days of Interest" | localize}}
+                                    </p>
+                                    <div class="form-box w-10 d-flex flex-wrap pb-0">
+                                        <label class="checkbox checkbox-lg mr-5 mb-5"
+                                            *ngFor="let option of daysOfInterest">
+                                            <input type="checkbox" name="daysOfInterest-{{option.value}}"
+                                                id="daysOfInterest-{{option.value}}" [value]="option.value"
+                                                [checked]="dayOfInterestSelected(option.value)" daysOfInterest
+                                                [lead]="lead">
+                                            <span></span> {{option.text | localize}}
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--Days of Interest-->
+                            <div class="form-row" *ngIf="isCompleted">
+                                <div class="form-group col-12">
+                                    <p class="text-primary font-weight-bolder mb-2" >
+                                        {{"Follow-Up Timing" | localize}}
+                                    </p>
+                                    <div class="w-100 rounded p-5 bg-gray-medium border border-gray mb-4" >
+                                        <label *ngFor="let item of followUpTimeFrames" class="radio text-nowrap col"
+                                            for="followUpTimeFrame-{{item.value}}">
+                                            <input type="radio" name="followUpTimeFrame-{{item.value}}"
+                                                id="followUpTimeFrame-{{item.value}}" value="{{item.value}}"
+                                                [checked]="tour?.followUpTimeFrame === item.value"
+                                                [ngModel]="tour?.followUpTimeFrame"
+                                                (ngModelChange)="tour ? tour.followUpTimeFrame=$event : null">
+                                            <span></span> {{ item.text | localize}}
+                                        </label>
+                                    </div>
+                                    <!-- Follow Up -->
+                                </div>
+                            </div>
+                            <div *ngIf="!editingTour">
+                                <div class="form-box mb-4" >
+                                    <div class="row justify-content-center mb-4">
+                                        <div class="col-md-6">
+                                            <label class="font-weight-bolder gsi-required-field"
+                                                for="startingTime">
+                                                {{"Tour Type" | localize}}
+                                            </label>
+                                            <select
+                                                class="form-control form-control-sm"
+                                                id="tour-type"
+                                                #tourType="ngModel"
+                                                name="tour-type"
+                                                [ngModel]="tour?.type"
+                                                (ngModelChange)="tour ? tour.type=$event : null" required >
+                                                <option *ngFor="let item of tourTypes"
+                                                    [selected]="tour?.type === item.value"
+                                                    [value]="item.value">
+                                                    {{item.text }}
+                                                </option>
+                                            </select>
+                                            <validation-messages [formCtrl]="tourType"></validation-messages>
+                                        </div>
+                                        <!-- Tour Types -->
+                                        <div class="col-md-6">
+                                            <label class="font-weight-bolder gsi-required-field"
+                                                for="startingTime">
+                                                {{"Time" | localize}}
+                                            </label>
+                                            <div class="form-control form-control-sm form-control-solid form-control-solid-blue  d-flex align-items-center justify-content-between w-100">
+                                                <p-dropdown [options]="timeFrames"
+                                                    styleClass="form-control-blank"
+                                                    optionLabel="text" optionValue="value"
+                                                    dropdownIcon=""
+                                                    required
+                                                    #startTimeInput="ngModel"
+                                                    name="startTime"
+                                                    [virtualScroll]="true"
+                                                    [itemSize]="30"
+                                                    [(ngModel)]="startTime"
+                                                    (onChange)="onChangeStartTime($event.value)">
+                                                </p-dropdown>
+                                                <span> - </span>
+                                                <p-dropdown [options]="timeFrames"
+                                                    styleClass="form-control-blank"
+                                                    optionLabel="text" optionValue="value"
+                                                    dropdownIcon=""
+                                                    required
+                                                    #endTimeInput="ngModel"
+                                                    name="endTime"
+                                                    [virtualScroll]="true"
+                                                    [itemSize]="30"
+                                                    [(ngModel)]="endTime"
+                                                    (onChange)="onChangeEndTime($event.value)">
+                                                </p-dropdown>
+                                            </div>
+                                            <validation-messages [formCtrl]="endTimeInput"></validation-messages>
+                                        </div>
+                                    </div>
+
+                                    <div class="row justify-content-center align-items-center border-top border-gray pt-4" >
+                                        <div class="col-12">
+                                            <tour-schedule #tourSchedule [_tour]="originalTour" [_settings]="_settings"
+                                            (availabilityLoaded)="onTourAvailabilityLoaded($event)"
+                                            (dateChanged)="onChangeDate($event)">
+                                            </tour-schedule>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--Tour scheduled date-time-->
+
+                                <div class="row">
+                                <div class="col-md-6">
+                                    <label class="font-weight-bolder"
+                                        [ngClass]="{'gsi-required-field': tour?.type === inPersonTourType}">
+                                        {{"Tour Guide" | localize}}
+                                    </label>
+                                    <select class="form-control form-control-sm" name="guide-name"
+                                    [ngModel]="tour?.guideId"
+                                        (ngModelChange)="tour ? tour.guideId=($event ? $event : null) : null"
+                                        [required]="tour?.type === inPersonTourType" #tourGuide="ngModel">
+                                        <option *ngFor="let item of guides" value="{{item.id}}"
+                                            [selected]="tour?.guideId === item.id">
+                                            {{item.name}}
+                                        </option>
+                                    </select>
+                                    <validation-messages [formCtrl]="tourGuide"></validation-messages>
+                                </div>
+                                <!--Tour Guides-->
+                                </div>
+                            </div>
+                            <div *ngIf="editingTour">
+                                <p class="text-primary font-weight-bolder mb-0">
+                                    {{"Notes From Tour" | localize}}
+                                </p>
+                                <textarea class="form-control" rows="4" id="notes"
+                                    name="notes" #notes="ngModel" [ngModel]="tour?.notes"
+                                    (ngModelChange)="tour ? tour.notes=$event : null">
+                                </textarea>
+                                <validation-messages [formCtrl]="notes"></validation-messages>
+                            </div>
+                            <!--Notes From Tour-->
+                        </div>
+                    </div>
+                    <!--Form-->
+
+                </div>
+
+                <div class="modal-footer justify-content-center">
+                    <button type="button"
+                        class="btn btn-primary-lighter"
+                        (click)="showDiscardChangesModal()">
+                        {{"Cancel" | localize}}
+                    </button>
+                    <button type="button" *ngIf="displayTourForm"
+                        class="btn btn-primary"
+                        (click)="validateConflictingScheduleAndSaveTour()" [disabled]="!tourForm.form.valid">
+                        {{"Save" | localize}}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<goddard-confirmation-modal #discardChangesModal
+    (accept)="discardChanges()"
+    (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true"
+    [messageBody]="l('DiscardTourConfirmation')"
+    [okButtonText]="l('DiscardTourOkButtonText')"
+    [cancelButtonText]="l('DiscardTourCancelButtonText')">
+</goddard-confirmation-modal>
+<!--Discard Modal -->
+
+<goddard-confirmation-modal #conflictingScheduleModal
+    (accept)="saveTour()"
+    (reject)="closeConflictScheduleModal()"
+    [title]="l('Tour Conflict!')"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true"
+    [messageBody]="l('TourConflictWarning')"
+    [okButtonText]="l('Save Tour')"
+    [cancelButtonText]="l('Cancel')">
+</goddard-confirmation-modal>
+<!--Conflicting tour schedule Modal -->
+
+<div appBsModal #completedTourModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" id="gsi-complete-tour-modal__options">
+            <div class="modal-header border-0 pb-0 justify-content-end">
+                <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="closeCompletedTourModal()"></button>
+            </div>
+            <div class="modal-body">
+                <p class="h5 text-center font-weight-bolder pb-3">
+                    {{"Please select one of the following actions." | localize}}
+                </p>
+                <div class="d-flex justify-content-center pb-3">
+                    <button type="button" class="btn btn-white border-light-primary border-2 text-primary px-12 mr-4"
+                        id="gsi-toggle-folowup" (click)="toggleFollowUpOptions(true)">
+                        {{"Follow Up" | localize}}
+                    </button>
+                    <button type="button" class="btn btn-primary px-12" (click)="registerCompletedTour()">
+                        {{"Register" | localize}}
+                    </button>
+                </div>
+                <div id="followUpOptions"
+                    class="w-80 p-4 mt-4 mx-auto rounded border-light-dark-75 border-1 border bg-gray-medium justify-content-center d-flex">
+                    <div class="d-flex justify-content-between w-100">
+
+                        <div class="d-flex justify-content-center flex-grow-1"
+                            *ngFor="let option of completeToursOptions">
+                            <label class="radio radio-primary" for="gsi-follow-option-{{option.value}}">
+                                <input type="radio" id="gsi-follow-option-{{option.value}}" [value]="option.value"
+                                    name="gsi-follow-options">
+                                <span></span>
+                                {{option.text | localize}}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center d-none" id="gsi-complete-tour-modal__save">
+                <button type="button" class="btn btn-light-primary" (click)="saveMarkTourAsCompleted()">
+                    {{"Save" | localize}}
+                </button>
+            </div>
+        </div>
+
+        <div class="modal-content d-none" id="gsi-complete-tour-modal__register-msg">
+            <div class="modal-header border-0 pb-0 justify-content-end">
+                <button type="button" class="close" [attr.aria-label]="l('Close')"
+                    (click)="closeAllTourModalsAndReloadTours()"></button>
+            </div>
+            <div class="modal-body text-center">
+
+                <p class="font-weight-bold">
+                    Your tour information has been saved and lead details updated. Please visit FMS to complete the new
+                    registration.
+                </p>
+                <a class="btn btn-primary" target="_blank" href="{{registerTourFmsUrl}}">Continue to FMS</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Complete Tour Modal -->

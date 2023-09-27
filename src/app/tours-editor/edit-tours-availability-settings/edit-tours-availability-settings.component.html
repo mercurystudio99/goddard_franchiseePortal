@@ -1,0 +1,94 @@
+<div appBsModal #SettingsModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+[config]="{ backdrop: 'static', keyboard: false }">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <span>{{"Online Tour Settings" | localize}}</span>
+                </h5>
+                <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="showDiscardChangesModal()"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <p class="text-primary font-weight-bolder">
+                        <label class="form-label mb-0" for="maxOpenHouseParticipants">{{"Maximum Live Online Tour Participants" | localize}}</label>
+                    </p>
+                    <div class="row align-items-center mb-4">
+                        <div class="col-12 col-md-2">
+                            <select class="form-control form-control-sm"
+                                id="maxOpenHouseParticipants"
+                                name="maxOpenHouseParticipants"
+                                [ngModel]="_settings?.maxOpenHouseParticipants"
+                                (ngModelChange)="_settings?.maxOpenHouseParticipants ? _settings.maxOpenHouseParticipants=$event : null"
+                                [required]="true"
+                                aria-describedby="maxOpenHouseParticipantsHelpBlock">
+                                <option *ngFor="let index of _settingsOptions?.allowedMaxOpenHouseParticipants"
+                                    [value]="index" [selected]="_settings?.maxOpenHouseParticipants === index">
+                                    {{index | localize}}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <small id="maxOpenHouseParticipantsHelpBlock" class="form-text">
+                                Live Online tours allows you the option to include
+                                {{minConferenceParticipants}} to
+                                {{maxConferenceParticipants}}
+                                families in a virtual conference setting. Select your preferred maximum number of families that can be scheduled in a single tour time slot.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <p class="text-primary font-weight-bolder">
+                        {{"Pre-Recorded Tour" | localize}}
+                    </p>
+                    <div class="w-100 bg-light rounded py-4 px-8 mb-5">
+                        <p class="font-weight-bolder text-muted mb-0" *ngIf="!preRecordedTourIsActive">
+                            {{"No Active Pre-Recorded Tour" | localize}}
+                        </p>
+                        <p class="font-weight-bolder text-primary mb-0" *ngIf="preRecordedTourIsActive">
+                            <goddard-icons [iconClass]="['mr-2 d-inline-block']" [iconName]="['Color-Star']" [iconSize]="[20]"/>
+                            <span>{{"Your Pre-Recorded Tour is Active" | localize}}</span>
+                            <a [href]="preRecordedToursLink" target="_blank" class="ml-2">
+                                <span class="fa fa-external-link-alt fa-lg" data-toggle="popover" [popover]="l('Open link in new tab')" triggers="mouseenter:mouseleave"></span>
+                                <!-- <goddard-icons [iconSize]=[20] [iconName]="['External-Link']"></goddard-icons> -->
+                            </a>
+                            <a class="ml-2" href="javascript:;" (click)="displaySuccess()" [copy]="preRecordedToursLink">
+                                <span class="fa fa-copy fa-lg" [copy]="preRecordedToursLink" data-toggle="popover" [popover]="l('Copy link to clipboard')" triggers="mouseenter:mouseleave"></span>
+                                <div id="copied-alert-target"></div>
+                            </a>
+                        </p>
+                    </div>
+
+                    <app-mailto-link *ngIf="!preRecordedTourIsActive" mailto="{{preRecordedToursMailTo}}"
+                                     requestSubject="{{l('PreRecordedToursMailSubject')}}"
+                                     requestBody="{{l('PreRecordedToursMailBody')}}" linkText="{{l('InactivePreRecordedToursMailLinkText')}}"
+                                     [cssClasses]="'w-100 d-flex align-items-center small'" [addLineBreak]="false" #mailToLink>
+                    </app-mailto-link>
+
+                    <app-mailto-link *ngIf="preRecordedTourIsActive" mailto="{{preRecordedToursMailTo}}"
+                                     requestSubject="{{l('PreRecordedToursMailSubject')}}"
+                                     requestBody="{{l('PreRecordedToursMailBody')}}" linkText="{{l('ActivePreRecordedToursMailLinkText')}}"
+                                     [cssClasses]="'w-100 d-flex align-items-center small'" [addLineBreak]="false" #mailToLink>
+                    </app-mailto-link>
+
+                </div>
+            </div>
+            <div class="modal-footer d-flex justify-content-center">
+                <button type="button" class="btn btn-light-primary" (click)="showDiscardChangesModal()">
+                    {{"Cancel" | localize}}
+                </button>
+                <button type="button" class="btn btn-primary" (click)="saveOnlineTourSettings()">
+                    {{"Save Settings" | localize}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Tour Availability Settings -->
+
+
+<goddard-confirmation-modal #discardChangesModal (accept)="discardChanges()" (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges" [useDefaultsForType]="true">
+</goddard-confirmation-modal>
+<!--Discard Modal -->

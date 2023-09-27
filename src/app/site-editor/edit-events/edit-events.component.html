@@ -1,0 +1,36 @@
+<div [@routerTransition]>
+    <div class="container pt-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            {{"School Events" | localize}}
+                        </h3>
+                        <button *ngIf="isCalendarView" type="button" class="btn gsi-btn-cta" (click)="addNewCalendarEvent()">
+                            <goddard-icons [iconClass]="['gsi-icon_white mr-2']" [iconSize]="[20]"
+                                [iconName]="['Outline-Plus']"></goddard-icons>
+                            <span>{{"Add Event" | localize}}</span>
+                        </button>
+                        <button *ngIf="isTemplateView" type="button" class="btn gsi-btn-cta" (click)="addNewEventTemplate()">
+                            <goddard-icons [iconClass]="['gsi-icon_white mr-2']" [iconSize]="[20]"
+                                [iconName]="['Outline-Plus']"></goddard-icons>
+                            <span>{{"Add Template" | localize}}</span>
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <nav class="nav nav-pills">
+                            <a routerLink="/app/site-editor/edit-events/calendar" class="nav-link" routerLinkActive="active">
+                                {{"Event Calendar" | localize}}
+                            </a>
+                            <a routerLink="/app/site-editor/edit-events/templates" class="nav-link" routerLinkActive="active">
+                                {{"Templates" | localize}}
+                            </a>
+                        </nav>
+                        <router-outlet></router-outlet>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+ </div>

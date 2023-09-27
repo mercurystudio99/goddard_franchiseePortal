@@ -1,0 +1,58 @@
+<div class="row py-3 pb-5">
+    <div class="col-6">
+        <p class="font-weight-bolder ">
+            {{"Date" | localize}} <span class="text-secondary">*</span>
+        </p>
+        <full-calendar #calendar class="gsi-tour-form__calendar" [options]="calendarOptions">
+        </full-calendar>
+    </div>
+    <div class="col-6">
+       <div class="d-flex w-100 justify-content-between">
+            <p class="font-weight-bolder  mb-0">
+                {{"Tour Time Slots" | localize}}
+            </p>
+            <p class="text-dark small">
+                {{"(# indicates booked tours)" | localize}}
+            </p>
+       </div>
+        <ul class="gsi-tour-form__tour-list">
+            <li *ngIf="!dateHasConfiguredAvailability()" class="gsi-tour-form__tour-no-results" data-tour-type="0">
+                {{"There are no tour time slots configured for this day of week" | localize}}
+            </li>
+            <div *ngIf="dateHasConfiguredAvailability()">
+                <ng-template ngFor let-scheduleItemDto [ngForOf]="scheduledItemsForSelectedDate()" let-i="index">
+                    <li>
+                        <span class="gsi-tour-form__tour-link d-flex w-100 justify-content-between">
+                            <div class="gsi-tour-form__tour-time">
+                                {{ getTourTimeString(scheduleItemDto.startDateTime) }} -
+                                {{ getTourTimeString(scheduleItemDto.endDateTime) }}
+                            </div>
+                            <span *ngFor="let tourType of scheduleItemDto.tourTypes; let isLast = last" class="gsi-tour-form__tour-icon small">
+                                <span class="font-weight-bold">
+                                    {{tourType.attendeeCount}}
+                                </span>
+                                {{tourType.tourType | displayName | localize }}
+                                <span *ngIf="!isLast">,</span>
+                            </span>
+                        </span>
+                    </li>
+                </ng-template>
+            </div>
+        </ul>
+    </div>
+    <div class="col-12 d-flex pt-3 small">
+        <div class="d-flex align-items-center mr-3">
+            <span class="gsi-tour-form__label__today d-inline-block mr-1"></span>
+            {{"Today" | localize}}
+        </div>
+        <div class="d-flex align-items-center mr-3" >
+            <span class="gsi-tour-form__label__available d-inline-block mr-1"></span>
+            {{"Available" | localize}}
+        </div>
+        <div class="d-flex align-items-center mr-3">
+            <span class="gsi-tour-form__label__new-day d-inline-block mr-1"></span>
+            {{"Selected Day" | localize}}
+        </div>
+
+    </div>
+</div>

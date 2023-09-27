@@ -1,0 +1,281 @@
+<div class="gsi-edit-trigger border-danger d-none" #editSummerCampEventsTrigger>
+    <button class="btn btn-danger py-3 px-4">
+        <span class="d-flex" (click)="openModal()">
+            <goddard-icons [iconClass]="['mr-2']" [iconName]="['Edit-White']" [iconSize]="[16]">
+            </goddard-icons>
+            <span>
+                {{"Edit" | localize}}
+            </span>
+        </span>
+    </button>
+</div>
+<!--Editing Trigger-->
+
+<div appBsModal #editSummerCampEventsModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-dialog-centered  modal-lg">
+        <div class="modal-content">
+            <form>
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{"Summer Calendar" | localize}}
+                    </h5>
+                    <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="close()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+
+                        <div class="col-12 d-flex justify-content-end">
+                            <button class="btn btn-primary" (click)="openNewEventModal(undefined)">
+                                <span class="d-flex">
+                                    <goddard-icons [iconClass]="['gsi-icon_white mr-2']" [iconSize]="[20]"
+                                        [iconName]="['Outline-Plus']"></goddard-icons>
+                                    <span> Add</span>
+                                </span>
+                            </button>
+                        </div>
+                        <!-- Add new Event -->
+
+                        <div class="col-12">
+                            <p-table class="gsi-table gsi-table_sortable" #dataTablSummerEvents
+                                [value]="_assetList?.items" [reorderableColumns]="true"
+                                (onRowReorder)="onReorderSummerCampEvents($event)">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th></th>
+                                        <th>{{"Title" | localize}}</th>
+                                        <th>{{"Icon" | localize}}</th>
+                                        <th class="options-cell"></th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-event let-index="rowIndex">
+                                    <tr [pReorderableRow]="index">
+                                        <td class="text-center">
+                                            <img class="gsi-list-drag-icon"
+                                                src="/assets/metronic/themes/theme7/images/gsi_drag_icon.svg"
+                                                pReorderableRowHandle>
+                                        </td>
+                                        <td>
+                                            <span class="p-column-title">{{"Table" | localize}}</span>
+                                            {{event.title}}
+                                        </td>
+                                        <td>
+                                            <img [src]="findIconUrlByName(event?.icon)">
+                                        </td>
+
+                                        <td class="text-right">
+                                            <button class="btn btn-sm btn-primary mr-2"
+                                                (click)="openNewEventModal(event.name)">
+                                                <goddard-icons [iconClass]="['gsi-icon_white']" [iconSize]="[20]"
+                                                    [iconName]="['Outline-Pencil']"></goddard-icons>
+                                            </button>
+                                            <button [ngClass]="['btn btn-sm btn-secondary']"
+                                                (click)="onDeleteSummerCampEvent(event.name)">
+                                                <span class="d-flex">
+                                                    <goddard-icons [iconClass]="['gsi-icon_white']" [iconSize]="[20]"
+                                                        [iconName]="['Outline-Trash']"></goddard-icons>
+                                                </span>
+                                            </button>
+                                        </td>
+                                        <!-- Edit or Delete Event -->
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-center">
+                    <button type="button" class="btn btn-light-primary" (click)="close()">
+                        {{"Cancel" | localize}}
+                    </button>
+                    <!--<app-save-button text="Save & Publish" (onClickEvent)="saveFacultyMember()" #saveButton>
+                    </app-save-button>-->
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!--Edit Summer Camp Events Modal -->
+
+<div appBsModal #newSummerCampEventModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-dialog-centered  modal-lg">
+        <div class="modal-content">
+            <form *ngIf="_assetListItemDto" #summerCampEventForm="ngForm" novalidate>
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{( _assetListItemDto?.name !== null ? "Edit " : "New") + " Summer Calendar" | localize }}
+                    </h5>
+                    <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="closeNewEventModal()"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="form-row align-items-center">
+                        <div class="form-group col-12 col-md-10">
+                            <label class="gsi-required-field"
+                                for="headline">
+                                {{"Name" | localize}}
+                            </label>
+                            <input class="form-control form-control-solid" type="text" id="title" name="title"
+                                placeholder="" [required]="true" #title="ngModel"
+                                [ngModel]="_assetListItemDto?.title"
+                                (ngModelChange)="_assetListItemDto ? _assetListItemDto.title=$event : null" />
+                            <validation-messages [formCtrl]="title"></validation-messages>
+                        </div>
+
+                        <div class="form-group col-12 col-md-2 position-relative">
+                            <label class="" for="headline">
+                                {{"Icon" | localize}}
+                            </label>
+
+                            <div class="form-control form-control-solid gsi-form-control-select-arrow py-0 d-flex align-items-center justify-content-start overflow-hidden"
+                                id="gsi-icon-select" role="button"
+                                (click)="opIconSelection.show($event)">
+                                <span *ngIf="selectedIcon?.publishUrl">
+                                    <img class="gsi-event-selected-icon-img img-fluid" [src]="selectedIcon?.publishUrl">
+                                </span>
+                            </div>
+                            <p-overlayPanel #opIconSelection [baseZIndex]="9999" styleClass="gsi-op-icon-panel">
+                                <ng-template pTemplate>
+                                    <div class="gsi-op-icon-panel_inner">
+                                        <div class="row">
+                                            <div class="col-3" *ngFor="let rendition of renditions">
+                                                <button type="button" class="bg-white border-0"
+                                                    (click)="selectIcon(rendition)">
+                                                    <img class="img-fluid" [src]="rendition?.publishUrl" alt="">
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </p-overlayPanel>
+                            <!--Icon Select Overlay Panel -->
+
+                        </div>
+
+                        <div class="form-group col-12">
+                            <div class="form-group">
+                                <label
+                                    class="gsi-required-field"
+                                    for="pdfFile">
+                                    {{"File" | localize}}:
+                                </label>
+
+                                <div *ngIf="!selectedFileName && _assetListItemDto.fileReference === null" drag-and-drop
+                                    (fileDropped)="onFileDropped($event)"
+                                    class="gsi-profile-image-edit d-flex flex-column p-9 align-items-center justify-content-center w-100 bg-light rounded border-dashed-primary">
+                                    <div class="d-flex align-items-center justify-contentcenter py-4">
+                                        <span
+                                            class="px-4 cursor-pointer text-tertiary d-flex  justify-content-center align-items-center"
+                                            (click)="selectFile()">
+                                            <goddard-icons [iconName]="['Upload-Blue']" [iconSize]="[20]">
+                                            </goddard-icons>
+                                            <span class="text-uppercase ml-1">{{"Upload" | localize}}</span>
+                                        </span>
+                                    </div>
+                                    <p class="text-center"><small>{{"Drop PDF File Here" | localize}}</small></p>
+                                </div>
+
+                                <div *ngIf="selectedFileName || _assetListItemDto.fileReference !== null" class="row">
+                                    <div class="form-group col-8">
+                                        <label class="text-primary">
+                                            {{
+                                            (selectedFileName
+                                            ? getFileNameFromPath(selectedFileName)
+                                            : getFileNameFromPath(_assetListItemDto.fileReference))
+                                            }}
+                                        </label>
+                                    </div>
+                                    <div class="form-group col-2">
+                                        <button [ngClass]="['btn btn-sm btn-secondary']" (click)="selectFile()">
+                                            <span class="d-flex">
+                                                <goddard-icons [iconClass]="['gsi-icon_white']" [iconSize]="[20]"
+                                                    [iconName]="['Outline-Trash']">
+                                                </goddard-icons>
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <input type="file" hidden id="pdfFile" name="pdfFile" [required]="true"
+                                    #summerCampEventFile accept="{{PDF_EXTENSION}}"
+                                    (change)="fileChangeEvent($event)" />
+
+                                <div [hidden]="validFile()" class="form-group col-12">
+                                    <div class="row form-control-feedback" *ngIf="!eventFileSelected()">
+                                        {{ l("{0}IsRequired", "File")}}
+                                    </div>
+                                    <div class="row form-control-feedback">
+                                        {{ l("MaxFileSize{0}", MAX_PDF_SIZE_MB + " MB")}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group col-12">
+                            <label class="" for="isActive">
+                                {{"Publish Options" | localize}}
+                            </label>
+                            <div class="radio-list">
+                                <label class="radio radio-accent radio-primary d-flex align-items-center mb-8">
+                                    <input type="radio" name="displayEventAlways" [checked]="displayEventAlways"
+                                        [value]="false" [(ngModel)]="displayEventAlways">
+                                    <span></span>
+                                    <div [ngClass]="{'gsi-required-field': !displayEventAlways}">
+                                        {{"Display Until:" | localize}}
+                                    </div>
+                                    <div>
+                                        <input type="text" id="offTime" name="offTime"
+                                            class="form-control form-control-solid ml-3" placeholder="" bsDatepicker
+                                            [bsConfig]="datePickerConfig"
+                                            [required]="!displayEventAlways" [disabled]="displayEventAlways"
+                                            #offTime="ngModel"
+                                            [ngModel]="_assetListItemDto?.offTime | date: 'MM/dd/yyyy'"
+                                            (ngModelChange)="_assetListItemDto ? _assetListItemDto.offTime=$event : null">
+                                        <validation-messages [formCtrl]="offTime"></validation-messages>
+                                    </div>
+                                </label>
+                                <label class="radio radio-accent radio-primary d-flex align-items-center mb-8">
+                                    <input type="radio" name="displayEventAlways" [checked]="displayEventAlways"
+                                        [value]="true" [(ngModel)]="displayEventAlways">
+                                    <span></span>
+                                    <div>{{"Display Always" | localize}}</div>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-center">
+                    <button type="button" class="btn btn-light-primary" (click)="closeOrShowDiscardChangesModal()">
+                        {{"Cancel" | localize}}
+                    </button>
+                    <app-save-button text="Save & Publish" (onClickEvent)="saveSummerCampEvent()" #saveButton>
+                    </app-save-button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!--Edit New Event Modal -->
+
+<goddard-confirmation-modal #discardChangesModal
+    (accept)="discardChanges()"
+    (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true">
+</goddard-confirmation-modal>
+<!--Discard Modal -->
+
+<goddard-confirmation-modal
+    #removeSummerCampEventConfirmModal
+    (accept)="summerCampEventRemoveAccepted()"
+    (reject)="summerCampEventRemoveRejected()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true"
+    [messageBody]="l('SummerCampEventDeleteWarningMessage')"
+    [okButtonText]="l('Yes')"
+    [cancelButtonText]="l('Cancel')">
+</goddard-confirmation-modal>
+<!--Delete Summer Event Modal -->

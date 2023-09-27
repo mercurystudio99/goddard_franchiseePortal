@@ -1,0 +1,208 @@
+<div appBsModal #editFacultyMemberModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-dialog-centered  modal-lg">
+        <div class="modal-content">
+            <form #facultyMemberForm="ngForm" novalidate (ngSubmit)="saveFacultyMember()">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{"Edit Faculty Bio" | localize}}
+                    </h5>
+                    <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="close()"></button>
+                </div>
+                <div class="modal-body" *ngIf="facultyMember">
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="givenName">
+                                {{"Name" | localize}}
+                            </label>
+                            <input type="text" id="givenName" name="givenName" #givenName="ngModel"
+                                class="form-control" placeholder="Enter full name"
+                                [(ngModel)]="facultyMember.givenName" required readonly [ngClass]="{'border border-danger':
+                                facultyMemberForm.form.controls['givenName'] &&
+                                facultyMemberForm.form.controls['givenName'].errors
+                            }">
+                            <validation-messages [formCtrl]="givenName"></validation-messages>
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="jobCategory">
+                                {{"Job Category" | localize}}
+                            </label>
+                            <input type="text" id="jobCategory" name="jobCategory" #jobCategory="ngModel"
+                                class="form-control" placeholder=""
+                                [(ngModel)]="facultyMember.jobCategory" required readonly [ngClass]="{'border border-danger':
+                                facultyMemberForm.form.controls['jobCategory'] &&
+                                facultyMemberForm.form.controls['jobCategory'].errors
+                            }">
+                            <validation-messages [formCtrl]="jobCategory"></validation-messages>
+                        </div>
+                        <div class="form-group col-12">
+                            <label
+                                for="jobTitle">
+                                {{"Job Title" | localize}}
+                                <goddard-tooltip [toolTipPath]="tooltips.FACULTY_JOB_TITLE"></goddard-tooltip>
+                            </label>
+                            <input type="text" id="jobTitle" name="jobTitle" #jobTitle="ngModel"
+                                class="form-control" placeholder=""
+                                [(ngModel)]="facultyMember.jobTitle" maxlength="200" [ngClass]="{'border border-danger':
+                                    facultyMemberForm.form.controls['jobTitle'] &&
+                                    facultyMemberForm.form.controls['jobTitle'].errors
+                                }">
+                            <validation-messages [formCtrl]="jobTitle"></validation-messages>
+                        </div>
+                        <div class="form-group col-12">
+                            <label
+                                for="facultyImage">
+                                {{"Image" | localize}}
+                            </label>
+                            <div drag-and-drop (fileDropped)="onFileDropped($event)"
+                                class="gsi-profile-image-edit d-flex flex-column p-9 align-items-center justify-content-center w-100 rounded border-dashed">
+                                <div
+                                    class="image-input image-input-outline image-input-circle  d-flex align-items-center justify-content-center">
+                                    <div class="image-input-wrapper bg-white"
+                                        style="background-image: url({{imageUrlOrBase64}})"></div>
+                                </div>
+                                <p (click)="onPickImage()" class="m-4 cursor-pointer">
+                                    <span class="mr-1 gsi-text--link">{{"Upload" | localize}}</span>
+                                    <span>{{"or Drop Photo Here" | localize}}</span>
+                                </p>
+                                <p *ngIf="!isDefaultFacultyImage() && !changeFacultyImage"
+                                    (click)="onDeleteImageClick()" class="mb-0">
+                                    <span class="gsi-text--link cursor-pointer">{{"Delete Photo" | localize }}</span>
+                                </p>
+                                <input type="file" accept="{{acceptedFileTypes}}" id="facultyImage"
+                                    name="facultyImage" #facultyImgFile hidden (change)="fileChangeEvent($event)" />
+                            </div>
+                        </div>
+                        <div class="form-group col-12">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <label
+                                    for="biography">{{"Bio Content" | localize}}
+                                    <span class="text-secondary">*</span>
+                                </label>
+                                <small class="form-text text-muted" [ngClass]="{'text-secondary': highlightRemainingCharactersLabel()}">
+                                    {{maxBiographyLength - facultyMember.biography?.length}}
+                                    {{' Characters remaining' | localize}}
+                                </small>
+                            </div>
+                            <textarea rows="5" id="biography" name="biography"
+                                class="form-control" #biography="ngModel"
+                                [(ngModel)]="facultyMember.biography" required maxlength="{{maxBiographyLength}}"
+                                [ngClass]="{'border border-danger':
+                                    facultyMemberForm.form.controls['biography'] &&
+                                    facultyMemberForm.form.controls['biography'].errors
+                                }">
+                            </textarea>
+                            <validation-messages [formCtrl]="biography"></validation-messages>
+                        </div>
+
+                        <div class="form-group col-12">
+                            <label for="isSpotlighted" class="checkbox checkbox-lg mb-0">
+                                <input type="checkbox" id="isSpotlighted" name="isSpotlighted"
+                                    [(ngModel)]="facultyMember.isSpotlighted">
+                                <span></span> {{'Include as featured bio on school homepage' | localize}}
+                                <br>
+                                <small class="form-text text-muted">{{'Note, only one bio can be featured at a time'}}</small>
+                            </label>
+                        </div>
+
+                        <div class="form-group mb-0 col-12">
+                            <label for="displayOnWebsite" class="checkbox checkbox-lg mb-0">
+                                <input type="checkbox" id="displayOnWebsite" name="displayOnWebsite"
+                                    [ngModel]="facultyMember?.displayOnWebsite"
+                                    (ngModelChange)="facultyMember ? facultyMember.displayOnWebsite=$event : null"
+                                    [checked]="facultyMember.displayOnWebsite">
+                                <span></span> {{'Display on Website' | localize}}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-tertiary" (click)="showDiscardChangesModal()">
+                        {{"Cancel" | localize}}
+                    </button>
+                    <app-save-button text="Save & Publish" (onClickEvent)="saveFacultyMember()" #saveButton>
+                    </app-save-button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!--Edit Faculty Member Modal -->
+
+<div appBsModal #cropImageModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    {{"Edit Photo" | localize}}
+                </h5>
+                <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="closeCropImageModal()"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row  align-items-center">
+                    <div class="col-9">
+                        <image-cropper class="gsi-image-cropper" [imageChangedEvent]="imageChangedEvent"
+                            [maintainAspectRatio]="true" [aspectRatio]="1/1" [transform]="cropperTramsform"
+                            format="{{defaultImageFormat}}" [imageFile]="selectedImage" [cropperMinHeight]="350"
+                            (imageCropped)="imageCropped($event)" (imageLoaded)="imageLoaded()"
+                            (cropperReady)="cropperReady()" (loadImageFailed)="loadImageFailed()">
+                        </image-cropper>
+                    </div>
+                    <div class="col-3">
+                        <div class="overflow-hidden rounded-circle bg-light">
+                            <img *ngIf="thumbnailUrl != ''" [src]="thumbnailUrl" class="img-fluid">
+                        </div>
+                    </div>
+                </div>
+                <!--IMAGE CROPPER-->
+                <div class="row justify-content-center pt-6">
+                    <div class="col-7">
+                        <div class="form-group">
+                            <label
+                                for="imageStraighten">{{"Rotate" | localize}}</label>
+                            <input type="range" [value]="cropperRotation" min="-360" max="360" step="10"
+                                (change)="rotateImage($event)" class="form-control-range" id="imageStraighten">
+                        </div>
+                    </div>
+                    <div class="col-2  py-2">
+                        <span class="text-tertiary cursor-pointer" (click)="resetImage()">
+                            <span class="lead">&#8635;</span> {{"Refresh" | localize}}
+                        </span>
+                    </div>
+
+                </div>
+                <!--IMAGE CROPPER INPUTS-->
+            </div>
+            <div class="modal-footer d-flex justify-content-center">
+                <button type="button" class="btn btn-tertiary" (click)="closeCropImageModal()">
+                    {{"Cancel" | localize}}
+                </button>
+                <button type="button" class="btn btn-primary" (click)="onSelectImageChanges()">
+                    {{"Save Updates" | localize}}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--IMAGE CROPPER -->
+
+<goddard-confirmation-modal #discardChangesModal
+    (accept)="discardChanges()"
+    (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true">
+</goddard-confirmation-modal>
+<!--Discard Modal -->
+
+<goddard-confirmation-modal #clearSpotlightedFacultyModal
+    (accept)="onConfirmClearPreviousSpotlightedFaculty()"
+    (reject)="closeClearSpotlightedModal()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true"
+    [title]="l('Faculty_Spotlight_Confirmation')"
+    [messageBody]="l('Faculty_Clear_Spotlighted_Confirmation')"
+    [okButtonText]="l('Continue')"
+    [cancelButtonText]="l('DiscardCancelButtonText')">
+</goddard-confirmation-modal>
+<!--Clear Spotlighted Confirmation -->

@@ -1,0 +1,37 @@
+<div [@routerTransition]>
+    <div class="gsi-preview-container container px-0 mt-5">
+        <div class="position-relative">
+
+            <div class="gsi-edit-trigger border-danger d-none" *ngFor="let facultymembereditor of facultyMembersDOMList"
+                [id]="'editTrigger-' + getFacultyId(facultymembereditor)">
+                <button class="btn btn-danger  d-flex  py-3 px-4">
+                    <div class="btn-link-opacity d-flex pr-4 border-right border-white"
+                        (click)="onEditFacultyMember(facultymembereditor)">
+                        <goddard-icons [iconClass]="['mr-2']" [iconName]="['Edit-White']" [iconSize]="[16]">
+                        </goddard-icons>
+                        <span>
+                            {{"Edit" | localize}}
+                        </span>
+                    </div>
+                    <span class="btn-link-opacity d-flex pl-4" (click)="onSortFacultyMembers()">
+                        <span class="text-white pr-2">
+                            &#x2630;
+                        </span>
+                        <span>
+                            {{"Sort" | localize}}
+                        </span>
+                    </span>
+                </button>
+            </div>
+
+            <app-edit-faculty-members #editFacultyMember (save)="onSaveFacultyMember($event)">
+            </app-edit-faculty-members>
+
+            <app-sort-faculty-members #sortFacultyMember (save)="onSaveFacultyMember($event)">
+            </app-sort-faculty-members>
+
+            <app-page-preview pageId="FacultyPage" #pagePreview (iframeIsResized)="setEditors($event)">
+            </app-page-preview>
+        </div>
+    </div>
+</div>

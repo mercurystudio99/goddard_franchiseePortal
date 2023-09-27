@@ -1,0 +1,682 @@
+<!--Editing Trigger-->
+<div appBsModal #EventModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-dialog-centered  modal-lg">
+        <div class="modal-content">
+            <form #eventForm="ngForm" novalidate (ngSubmit)="saveEvent()">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{(calendarEvent?.id ? 'Edit' : 'New') + " Event" | localize}}
+                    </h5>
+                    <button type="button" class="close" (click)="close()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12 py-3 text-right text-secondary">
+                            * {{"Required Fields" | localize}}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-12 col-md-6">
+                            <label  for="headline">
+                                {{"Open From Template" | localize}}
+                            </label>
+
+                            <select class="form-control form-control-solid" name="eventTemplates"
+                                [ngModel]="selectedTemplateId" (ngModelChange)="fillEventFromEventTemplate($event)">
+                                <option value="undefined" selected>Select template...</option>
+                                <option *ngFor="let eventTemplate of _eventTemplates" [value]="eventTemplate.id">
+                                    {{eventTemplate.name}}
+                                </option>
+                            </select>
+
+                        </div>
+                        <div class="form-group col-12 col-sm-9 col-md-10">
+                            <label class=" gsi-required-field"
+                                for="headline">
+                                {{"Name" | localize}}
+                            </label>
+                            <input class="form-control form-control-solid" type="text" id="title" name="title"
+                                #title="ngModel" placeholder="" validateRequired [ngModel]="calendarEvent?.title"
+                                (ngModelChange)="calendarEvent ? calendarEvent.title=$event : null" />
+                            <validation-messages [formCtrl]="title"></validation-messages>
+                        </div>
+                        <div class="form-group col-12 col-sm-3 col-md-2 position-relative" #iconSelectionInput>
+                            <label  for="headline">
+                                {{"Icon" | localize}}
+                            </label>
+
+                            <div class="form-control form-control-solid gsi-form-control-select-arrow  py-0 d-flex align-items-center justify-content-start overflow-hidden"
+                                id="gsi-icon-select" role="button" (click)="opIconSelection.show($event)">
+                                <span *ngIf="selectedIcon">
+                                    <img class="gsi-event-selected-icon-img img-fluid" [src]="selectedIcon?.publishUrl"
+                                        alt="" *ngIf="selectedIcon.publishUrl">
+                                </span>
+                                <span class="text-nowrap" *ngIf="!selectedIcon">
+                                    {{calendarEvent?.iconFileName}}
+                                </span>
+                            </div>
+                            <p-overlayPanel #opIconSelection [baseZIndex]="9999" styleClass="gsi-op-icon-panel">
+                                <ng-template pTemplate>
+                                    <div class="gsi-op-icon-panel_inner">
+                                        <div class="row">
+                                            <div class="col-3" *ngFor="let rendition of renditions">
+                                                <button type="button" class="bg-white border-0"
+                                                    (click)="selectEventIcon(rendition)">
+                                                    <img class="img-fluid" [src]="rendition?.publishUrl" alt="">
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-template>
+                            </p-overlayPanel>
+                            <!--Icon Select Overlay Panel -->
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-12">
+                            <div>
+                                <label
+                                    class="d-inline-block  gsi-required-field"
+                                    for="publicWebSiteDescription">
+                                    {{"Description" | localize}}
+                                </label>
+                                <goddard-tooltip [toolTipPath]="tooltips.SCHOOL_EVENTS_CALENDAR_ADD_HYPERLINK"></goddard-tooltip>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <small>
+                                    {{l('Event_Link_Description_Tooltip')}}
+                                </small>
+                            </div>
+                            <div class="d-flex flex-row-reverse py-3">
+                                <small>
+                                    {{ remainingCharacters() }} {{'Characters remaining' | localize}}
+                                </small>
+                            </div>
+                            <p-editor id="publicWebSiteDescription" name="publicWebSiteDescription"
+                                #publicWebSiteDescription="ngModel" validateRequired trimStartToValidateRequired="<p>"
+                                trimEndToValidateRequired="</p>" placeholder="" validateMaxDescriptionLength
+                                maxDescriptionLength="{{maxDescriptionLength}}" maxMarkupLength="{{maxMarkupLength}}"
+                                [attr.data-max-description-length]="maxDescriptionLength"
+                                [attr.data-max-markup-length]="maxMarkupLengthForMessage"
+                                [ngModel]="calendarEvent?.publicWebSiteDescription"
+                                (ngModelChange)="calendarEvent ? calendarEvent.publicWebSiteDescription=$event : null"
+                                [style]="{'height':'120px'}" (onTextChange)="onDescriptionChange($event)"
+                                [formats]="editorFormatsWhitelist">
+                                <ng-template pTemplate="header">
+                                    <span class="ql-formats">
+                                        <button type="button" class="ql-link" aria-label="Link"></button>
+                                    </span>
+                                </ng-template>
+                            </p-editor>
+                            <validation-messages [formCtrl]="publicWebSiteDescription"></validation-messages>
+                            <div [hidden]="!calendarEvent?.publicWebSiteDescription" class="form-group mb-0">
+                                <div class="form-control-feedback" *ngIf="!validUrl">
+                                    {{"PleaseEnterValidURL" | localize}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group  col-12 col-md-6">
+                            <label class=" gsi-required-field"
+                                for="startDateTime">
+                                {{"Event Date" | localize}}
+                            </label>
+                            <input type="text" id="startDateTime" name="startDateTime"
+                                class="form-control form-control-solid" placeholder="" bsDatepicker
+                                [bsConfig]="datePickerConfig" #startDateTime="ngModel" placeholder="" [required]="true"
+                                [ngModel]="calendarEvent?.startDateTime | date: dateFormat"
+                                (ngModelChange)="calendarEvent ? calendarEvent.startDateTime=$event : null"
+                                (bsValueChange)="onPostingDateChange($event)" [datesEnabled]="enabledDates" />
+                            <validation-messages [formCtrl]="startDateTime"></validation-messages>
+                        </div>
+                        <div class="form-group col-12 col-md-6 col-form-label">
+                            <div class="pt-9 pl-3">
+                                <div class="radio-inline">
+                                    <label class="radio">
+                                        <input type="radio" name="isAllDay"
+                                            [checked]="calendarEvent?.isAllDay === false" [value]="false"
+                                            [ngModel]="calendarEvent?.isAllDay"
+                                            (ngModelChange)="calendarEvent ? calendarEvent.isAllDay=$event : null">
+                                        <span></span> Set Start / End Time
+                                    </label>
+                                    <label class="radio">
+                                        <input type="radio" name="isAllDay" [checked]="calendarEvent?.isAllDay"
+                                            [value]="true" [ngModel]="calendarEvent?.isAllDay"
+                                            (ngModelChange)="calendarEvent ? calendarEvent.isAllDay=$event : null"
+                                            (change)="onIsAllDayChange()">
+                                        <span></span>All Day Event
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-row p-4 mb-7  bg-light border rounded">
+                        <div class="form-group col-12 col-md-5 mb-0">
+                            <label
+                                for="startingTime">
+                                {{"Start Time" | localize}}
+                            </label>
+                            <timepicker #startingTimeInput="ngModel" class="gsi-timepicker" id="startingTime"
+                                name="startingTime" [ngModel]="startingTime"
+                                (ngModelChange)="startingTime ? startingTime=$event : null"
+                                [disabled]="calendarEvent?.isAllDay" validateTimeGreaterThan="endingTime" reverse="true"
+                                skipValidation="calendarEvent?.isAllDay">
+                            </timepicker>
+                        </div>
+                        <div class="form-group col-12 col-md-5 mb-0">
+                            <label  for="endingTime">
+                                {{"End Time" | localize}}
+                            </label>
+                            <timepicker #endingTimeInput="ngModel" class="gsi-timepicker" id="endingTime"
+                                name="endingTime" [ngModel]="endingTime"
+                                (ngModelChange)="endingTime ? endingTime=$event : null"
+                                [disabled]="calendarEvent?.isAllDay" validateTimeGreaterThan="startingTime"
+                                reverse="false" skipValidation="calendarEvent?.isAllDay">
+                            </timepicker>
+                            <validation-messages [formCtrl]="endingTimeInput"></validation-messages>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label  for="headline">
+                                {{"Recurring Event" | localize}}
+                            </label>
+                            <select class="form-control form-control-solid" name="recurringParameterPrimary"
+                                [ngModel]="calendarEvent?.recurringParameterPrimary"
+                                (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterPrimary=$event : null"
+                                (change)="onRecurringParameterPrimaryChange()">
+                                <option *ngFor="let recurrency of recurrencyTypes" [value]="recurrency.value">
+                                    {{recurrency.text}}
+                                </option>
+                            </select>
+                        </div>
+                        <!--DAILY-->
+                        <div class="form-group col-12 p-4 border bg-light rounded"
+                            *ngIf="calendarEvent?.recurringParameterPrimary === daily">
+                            <div class="form-row pl-0 pl-md-5">
+                                <div class="form-group col-12 mb-2">
+                                    <label >
+                                        {{"Repeats" | localize}}
+                                    </label>
+                                </div>
+                                <div class="form-group col-12">
+                                    <div class="radio-list">
+                                        <label class="radio radio-accent radio-primary d-flex align-items-center mb-8">
+                                            <input type="radio" name="recurringParameterSecondary" [value]="everyDay"
+                                                [checked]="calendarEvent?.recurringParameterSecondary === everyDay"
+                                                [ngModel]="calendarEvent?.recurringParameterSecondary"
+                                                (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterSecondary=$event : null"
+                                                (change)="onRecurringParameterSecondaryChanged()">
+                                            <span></span>
+                                            Every
+                                            <div *ngIf="calendarEvent?.recurringParameterSecondary === everyDay">
+                                                <input type="text"
+                                                    class="form-control form-control-sm form-control-inlabel position-relative d-inline-block mx-2"
+                                                    name="recurringParameterFirst" #recurringParameterFirst="ngModel"
+                                                    [ngModel]="calendarEvent?.recurringParameterFirst"
+                                                    (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterFirst=$event : null"
+                                                    [required]="calendarEvent?.recurringParameterSecondary === everyDay" />
+                                                <span class="gsi-required-field">day(s)</span>
+                                                <validation-messages class="position-absolute gsi-floating-val"
+                                                    [formCtrl]="recurringParameterFirst">
+                                                </validation-messages>
+                                            </div>
+                                        </label>
+
+                                        <label class="radio radio-accent radio-primary">
+                                            <input type="radio" name="recurringParameterSecondary"
+                                                [value]="everyWeekday"
+                                                [checked]="calendarEvent?.recurringParameterSecondary === everyWeekday"
+                                                [ngModel]="calendarEvent?.recurringParameterSecondary"
+                                                (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterSecondary=$event : null"
+                                                (change)="onRecurringParameterSecondaryChanged()">
+                                            <span></span> Every Week Day
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--WEEKLY-->
+                        <div class="form-group col-12 p-4 border bg-light rounded"
+                            *ngIf="calendarEvent?.recurringParameterPrimary === weekly">
+                            <div class="form-row pl-0 pl-md-5">
+                                <div class="form-group col-12 mb-2">
+                                    <label
+                                        class=" gsi-required-field">
+                                        {{"Repeats" | localize}}
+                                    </label>
+                                </div>
+                                <div class="form-group mb-0">
+                                    <p> Recur every
+                                        <input type="text"
+                                            class="form-control form-control-sm form-control-inlabel  position-relative d-inline-block mx-2"
+                                            style="opacity:1;z-index:unset;max-width: 50px;"
+                                            id="recurringParameterFirst" name="recurringParameterFirst"
+                                            #recurringParameterFirst="ngModel"
+                                            [ngModel]="calendarEvent?.recurringParameterFirst"
+                                            (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterFirst=$event : null"
+                                            [required]="calendarEvent?.recurringParameterPrimary === weekly" />
+                                        weeks(s) on:
+                                        <validation-messages class="position-absolute gsi-floating-val"
+                                            [formCtrl]="recurringParameterFirst"></validation-messages>
+                                    </p>
+                                    <div class="checkbox-list">
+                                        <label class="checkbox" *ngFor="let day of daysOfWeek; let i = index">
+                                            <input type="checkbox" name="recurringParameterSecond" id="{{day}}"
+                                                [value]="day"
+                                                [checked]="isWeekDaySelected(day)"
+                                                (click)="updateRecurringParameterSecond(day, $event)"
+                                                [required]="calendarEvent?.recurringParameterPrimary === weekly">
+                                            <span></span>{{day}}
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <input
+                                type="hidden"
+                                name="recurringParameterSecond"
+                                [ngModel]="calendarEvent?.recurringParameterSecond"
+                                (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterSecond=$event : null"
+                                [required]="true">
+                                <!-- Holder input for triggering form validation and to enable-disable save button -->
+
+                                <div class="mb-0 col-12">
+                                    <div class="form-control-feedback"
+                                        *ngIf="!atLeastOneDaySelectedForWeeklyEvent(calendarEvent?.recurringParameterSecond)">
+                                        {{ l("{0}IsRequired", "At least one day")}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--MONTHLY-->
+                        <div class="form-group col-12 p-4 border bg-light rounded"
+                            *ngIf="calendarEvent?.recurringParameterPrimary === 'Monthly'">
+                            <div class="form-row pl-0 pl-md-5">
+                                <div class="form-group col-12 mb-2">
+                                    <label >
+                                        {{"Repeats" | localize}}
+                                    </label>
+                                </div>
+                                <div class="form-group col-12">
+                                    <div class="radio-list">
+                                        <label class="radio radio-accent radio-primary d-flex align-items-center mb-8">
+                                            <input type="radio" name="recurringParameterSecondary"
+                                                [checked]="calendarEvent?.recurringParameterSecondary === day"
+                                                [value]="day" [ngModel]="calendarEvent?.recurringParameterSecondary"
+                                                (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterSecondary=$event : null"
+                                                (change)="onRecurringParameterSecondaryChanged()">
+                                            <span></span>
+                                            <div
+                                                [class]="calendarEvent?.recurringParameterSecondary === day ? 'gsi-required-field':''">
+                                                {{"Day" | localize }}
+                                            </div>
+                                            <div class="d-flex align-items-center text-nowrap"
+                                                *ngIf="calendarEvent?.recurringParameterSecondary === day">
+                                                <div class="position-relative">
+                                                    <input type="number" min="1" max="7"
+                                                        class="form-control form-control-sm form-control-inlabel  position-relative d-inline-block mx-2"
+                                                        id="recurringParameterFirst" name="recurringParameterFirst"
+                                                        #recurringParameterFirst="ngModel"
+                                                        [ngModel]="calendarEvent?.recurringParameterFirst"
+                                                        (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterFirst=$event : null"
+                                                        [required]="calendarEvent?.recurringParameterSecondary === day" />
+                                                    <span class="pr-1">{{"of every" | localize }}</span>
+                                                    <validation-messages class="position-absolute gsi-floating-val ml-3"
+                                                        [formCtrl]="recurringParameterFirst">
+                                                    </validation-messages>
+                                                </div>
+                                                <div class="position-relative">
+                                                    <input type="number" min="1" max="12"
+                                                        class="form-control form-control-sm form-control-inlabel  position-relative d-inline-block mx-2"
+                                                        id="recurringParameterSecond" name="recurringParameterSecond"
+                                                        #recurringParameterSecond="ngModel"
+                                                        [ngModel]="calendarEvent?.recurringParameterSecond"
+                                                        (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterSecond=$event : null"
+                                                        [required]="calendarEvent?.recurringParameterSecondary === day" />
+                                                    <span class="gsi-required-field ">{{"month(s)" | localize}} </span>
+                                                    <validation-messages class="position-absolute gsi-floating-val ml-3"
+                                                        [formCtrl]="recurringParameterSecond">
+                                                    </validation-messages>
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <label class="radio radio-accent radio-primary mb-8">
+                                            <input type="radio" name="recurringParameterSecondary"
+                                                [checked]="calendarEvent?.recurringParameterSecondary === the"
+                                                [value]="the" [ngModel]="calendarEvent?.recurringParameterSecondary"
+                                                (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterSecondary=$event : null"
+                                                (change)="onRecurringParameterSecondaryChanged()">
+                                            <span></span>
+                                            <div class="d-flex align-items-center">
+                                                <span
+                                                    [class]="calendarEvent?.recurringParameterSecondary === the ? 'gsi-required-field' : ''">{{"The" | localize}}
+                                                </span>
+                                                <div class="d-flex align-items-center"
+                                                    *ngIf="calendarEvent?.recurringParameterSecondary === the">
+                                                    <div class="position-relative">
+                                                        <select
+                                                            class="form-control form-control-sm form-control-inlabel form-control-inlabel-wide position-relative d-inline-block w-150px mx-2"
+                                                            name="recurringParameterFirst"
+                                                            #recurringParameterFirst="ngModel"
+                                                            [ngModel]="calendarEvent?.recurringParameterFirst"
+                                                            (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterFirst=$event : null"
+                                                            [required]="calendarEvent?.recurringParameterSecondary === the">
+                                                            <option *ngFor="let ordNo of ordinalNumberOfDay"
+                                                                [value]="ordNo">
+                                                                {{ordNo}}
+                                                            </option>
+                                                        </select>
+                                                        <validation-messages class="position-absolute gsi-floating-val ml-3"
+                                                            [formCtrl]="recurringParameterFirst">
+                                                        </validation-messages>
+                                                    </div>
+                                                    <div class="position-relative">
+                                                        <select
+                                                            class="form-control form-control-sm form-control-inlabel form-control-inlabel-wide position-relative d-inline-block w-180px mx-2"
+                                                            name="recurringParameterSecond"
+                                                            #recurringParameterSecond="ngModel"
+                                                            [ngModel]="calendarEvent?.recurringParameterSecond"
+                                                            (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterSecond=$event : null"
+                                                            [required]="calendarEvent?.recurringParameterSecondary === the">
+                                                            <option *ngFor="let day of daysOfWeek" [value]="day">{{day}}
+                                                            </option>
+                                                        </select>
+                                                        <span class="text-nowrap gsi-required-field">{{"of every" |
+                                                            localize}}</span>
+                                                        <validation-messages class="position-absolute gsi-floating-val ml-3"
+                                                            [formCtrl]="recurringParameterSecond">
+                                                        </validation-messages>
+                                                    </div>
+                                                    <div class="position-relative">
+                                                        <input type="number" min="1" max="12"
+                                                            class="form-control form-control-sm form-control-inlabel position-relative d-inline-block w-65px mx-2"
+                                                            id="recurringParameterThird" name="recurringParameterThird"
+                                                            #recurringParameterThird="ngModel"
+                                                            [ngModel]="calendarEvent?.recurringParameterThird"
+                                                            (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterThird=$event : null"
+                                                            [required]="calendarEvent?.recurringParameterSecondary === the" />
+                                                        <span class="gsi-required-field">{{"month(s)" | localize}}</span>
+                                                        <validation-messages class="position-absolute gsi-floating-val ml-3"
+                                                            [formCtrl]="recurringParameterThird">
+                                                        </validation-messages>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--YEARLY-->
+                        <div class="form-group col-12 p-4 border bg-light rounded"
+                            *ngIf="calendarEvent?.recurringParameterPrimary === yearly">
+                            <div class="form-row pl-0 pl-md-5">
+                                <div class="form-group col-12 mb-2">
+                                    <label >
+                                        {{"Repeats" | localize}}
+                                    </label>
+                                </div>
+                                <div class="form-group col-12">
+                                    <label class="position-relative pb-5">
+                                        <span class="gsi-required-field">{{"Recur every" | localize}}</span>
+                                        <input type="text"
+                                            class="form-control form-control-sm form-control-inlabel  position-relative d-inline-block mx-2"
+                                            [required]="calendarEvent?.recurringParameterPrimary === yearly"
+                                            name="recurringParameterFirst" #recurringParameterFirst="ngModel"
+                                            [ngModel]="calendarEvent?.recurringParameterFirst"
+                                            (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterFirst=$event : null" />
+                                        {{"year(s) on:" | localize}}
+                                        <validation-messages class="position-absolute left-0 bottom-0"
+                                            [formCtrl]="recurringParameterFirst">
+                                        </validation-messages>
+                                    </label>
+                                    <div class="radio-list">
+                                        <label class="radio radio-accent radio-primary d-flex align-items-center mb-8">
+                                            <input type="radio" name="recurringParameterSecondary"
+                                                [checked]="calendarEvent?.recurringParameterSecondary === on"
+                                                [value]="on" [ngModel]="calendarEvent?.recurringParameterSecondary"
+                                                (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterSecondary=$event : null"
+                                                (change)="onRecurringParameterSecondaryChanged()">
+                                            <span></span>
+                                            <div
+                                                [class]="calendarEvent?.recurringParameterSecondary === on ? 'gsi-required-field':''">
+                                                On </div>
+                                            <div class="d-flex align-items-center"
+                                                *ngIf="calendarEvent?.recurringParameterSecondary === on">
+                                                <div class="position-relative">
+                                                    <select
+                                                        class="form-control form-control-sm form-control-inlabel form-control-inlabel-wide  position-relative d-inline-block w-180px mx-2"
+                                                        name="recurringParameterSecond" #recurringParameterSecond="ngModel"
+                                                        [ngModel]="calendarEvent?.recurringParameterSecond"
+                                                        (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterSecond=$event : null"
+                                                        (change)="onRecurringParameterSecondChanged($event.target.value)"
+                                                        [required]="calendarEvent?.recurringParameterSecondary === on">
+                                                        <option *ngFor="let position of monthSelectList"
+                                                            [value]="position.value">
+                                                            {{position.text}}
+                                                        </option>
+                                                    </select>
+                                                    <validation-messages class="position-absolute gsi-floating-val ml-3"
+                                                        [formCtrl]="recurringParameterSecond">
+                                                    </validation-messages>
+                                                </div>
+                                                <div class="position-relative">
+                                                    <input type="number" min="1" max="{{maxDayForYearlyRecurrentEvent}}"
+                                                        class="form-control form-control-sm form-control-inlabel  position-relative d-inline-block w-180px mx-2"
+                                                        name="recurringParameterThird" #recurringParameterThird="ngModel"
+                                                        [ngModel]="calendarEvent?.recurringParameterThird"
+                                                        (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterThird=$event : null"
+                                                        [required]="calendarEvent?.recurringParameterSecondary === on" />
+                                                    <span class="gsi-required-field mb-5"></span>
+                                                    <validation-messages class="position-absolute gsi-floating-val w-160px ml-3"
+                                                        [formCtrl]="recurringParameterThird">
+                                                    </validation-messages>
+                                                </div>
+                                            </div>
+                                        </label>
+                                        <label class="radio radio-accent radio-primary d-flex align-items-center mb-8">
+                                            <input type="radio" name="recurringParameterSecondary"
+                                                [checked]="calendarEvent?.recurringParameterSecondary === onThe"
+                                                [value]="onThe" [ngModel]="calendarEvent?.recurringParameterSecondary"
+                                                (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterSecondary=$event : null"
+                                                (change)="onRecurringParameterSecondaryChanged()">
+                                            <span></span>
+                                            <div
+                                                [class]="calendarEvent?.recurringParameterSecondary === onThe ? 'gsi-required-field' : ''">{{"On the" | localize}}</div>
+                                            <div class="d-flex align-items-center"
+                                                *ngIf="calendarEvent?.recurringParameterSecondary === onThe">
+                                                <div class="position-relative">
+                                                    <select
+                                                        class="form-control form-control-sm form-control-inlabel form-control-inlabel-wide  position-relative d-inline-block w-150px mx-2"
+                                                        name="recurringParameterSecond" #recurringParameterSecond="ngModel"
+                                                        [ngModel]="calendarEvent?.recurringParameterSecond"
+                                                        (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterSecond=$event : null"
+                                                        [required]="calendarEvent?.recurringParameterSecondary === onThe">
+                                                        <option *ngFor="let ordNo of ordinalNumberOfWeek" [value]="ordNo">
+                                                            {{ordNo}}
+                                                        </option>
+                                                    </select>
+                                                    <validation-messages class="position-absolute gsi-floating-val ml-3"
+                                                        [formCtrl]="recurringParameterSecond">
+                                                    </validation-messages>
+                                                </div>
+                                                <div class="position-relative">
+                                                    <select
+                                                        class="form-control form-control-sm  form-control-inlabel form-control-inlabel-wide position-relative d-inline-block w-150px mx-2"
+                                                        name="recurringParameterThird" #recurringParameterThird="ngModel"
+                                                        [ngModel]="calendarEvent?.recurringParameterThird"
+                                                        (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterThird=$event : null"
+                                                        [required]="calendarEvent?.recurringParameterSecondary === onThe">
+                                                        <option *ngFor="let day of daysOfWeek" [value]="day">{{day}}
+                                                        </option>
+                                                    </select>
+                                                    <validation-messages class="position-absolute gsi-floating-val ml-3"
+                                                        [formCtrl]="recurringParameterThird">
+                                                    </validation-messages>
+                                                </div>
+                                                <span class="gsi-required-field">{{"of" | localize}}</span>
+                                                <div class="position-relative">
+                                                    <select
+                                                        class="form-control form-control-sm form-control-inlabel form-control-inlabel-wide position-relative d-inline-block w-150px mx-2"
+                                                        name="recurringParameterFourth" #recurringParameterFourth="ngModel"
+                                                        [ngModel]="calendarEvent?.recurringParameterFourth"
+                                                        (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterFourth=$event : null"
+                                                        [required]="calendarEvent?.recurringParameterSecondary === onThe">
+                                                        <option *ngFor="let position of monthSelectList"
+                                                            [value]="position.value">
+                                                            {{position.text}}
+                                                        </option>
+                                                    </select>
+                                                    <validation-messages class="position-absolute gsi-floating-val ml-3"
+                                                        [formCtrl]="recurringParameterFourth">
+                                                    </validation-messages>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!--RECURRENCY RANGE-->
+                        <div class="form-group col-12 p-4 border bg-light rounded"
+                            *ngIf="calendarEvent?.recurringParameterPrimary">
+                            <div class="form-group col-12 mb-2">
+                                <label >
+                                    {{"Until" | localize}}
+                                </label>
+                            </div>
+                            <div class="form-group  col-12 col-md-6">
+                                <p>
+                                    {{"Start Date" | localize}}
+                                    <input
+                                        class="form-control form-control-sm form-control-inlabel form-control-inlabel-wide position-relative d-inline-block mx-2"
+                                        type="text" id="recurringParameterRangeStart"
+                                        name="recurringParameterRangeStart" disabled
+                                        [ngModel]="calendarEvent?.recurringParameterRangeStart | date: dateFormat"
+                                        (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterRangeStart=$event : null" />
+                                </p>
+                            </div>
+                            <div class="form-group col-12">
+                                <div class="radio-list">
+                                    <label class="radio radio-accent radio-primary d-flex align-items-center mb-8">
+                                        <input type="radio" name="recurringParameterRangeType"
+                                            [checked]="calendarEvent?.recurringParameterRangeType === after"
+                                            [value]="after" [ngModel]="calendarEvent?.recurringParameterRangeType"
+                                            (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterRangeType=$event : null"
+                                            (change)="onRecurringParameterRangeTypeChange()">
+                                        <span></span>
+                                        <div
+                                            [class]="calendarEvent?.recurringParameterRangeType === after ? 'gsi-required-field' : '' ">
+                                            After </div>
+                                        <div *ngIf="calendarEvent?.recurringParameterRangeType === after">
+                                            <input type="number" min="1"
+                                                class="form-control form-control-sm form-control-inlabel position-relative d-inline-block mx-2"
+                                                name="recurringParameterRangeQualifier"
+                                                #recurringParameterRangeQualifier="ngModel"
+                                                [ngModel]="calendarEvent?.recurringParameterRangeQualifier"
+                                                (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterRangeQualifier=$event : null"
+                                                [required]="calendarEvent?.recurringParameterRangeType === after" />
+                                            occurrences
+                                            <validation-messages class="position-absolute gsi-floating-val"
+                                                [formCtrl]="recurringParameterRangeQualifier">
+                                            </validation-messages>
+                                        </div>
+                                    </label>
+                                    <label class="radio radio-accent radio-primary d-flex align-items-center mb-8">
+                                        <input type="radio" name="recurringParameterRangeType"
+                                            [checked]="calendarEvent?.recurringParameterRangeType === endBy"
+                                            [value]="endBy" [ngModel]="calendarEvent?.recurringParameterRangeType"
+                                            (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterRangeType=$event : null"
+                                            (change)="onRecurringParameterRangeTypeChange()">
+                                        <span></span>
+
+                                        <div
+                                            [class]="calendarEvent?.recurringParameterRangeType === endBy ? 'gsi-required-field' : ''">
+                                            End on</div>
+                                        <div *ngIf="calendarEvent?.recurringParameterRangeType === endBy">
+                                            <input type="text"
+                                                class="form-control form-control-sm form-control-inlabel form-control-inlabel-wide  position-relative d-inline-block mx-2"
+                                                name="recurringParameterRangeQualifier"
+                                                #recurringParameterRangeQualifier="ngModel"
+                                                [ngModel]="calendarEvent?.recurringParameterRangeQualifier | date:dateFormat"
+                                                (ngModelChange)="calendarEvent ? calendarEvent.recurringParameterRangeQualifier=$event : null"
+                                                [required]="calendarEvent?.recurringParameterRangeType === endBy"
+                                                placeholder="" bsDatepicker [bsConfig]="datePickerConfig"
+                                                [minDate]="minRecurrencyEndingDate" />
+                                            <validation-messages class="position-absolute gsi-floating-val"
+                                                [formCtrl]="recurringParameterRangeQualifier">
+                                            </validation-messages>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-12">
+                            <label class="checkbox">
+                                <input type="checkbox" name="createCalendarEventTemplate"
+                                    id="createCalendarEventTemplate" [(ngModel)]="createCalendarEventTemplate"
+                                    [value]="createCalendarEventTemplate" [checked]="createCalendarEventTemplate">
+                                <span></span>
+                                {{"CREATE TEMPLATE" | localize}}
+                                <br>
+                                <small class="text-dark">
+                                    {{l('Save_As_Event_Template_Desc')}}
+                                </small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex flex-column">
+                    <div *ngIf="calendarEvent?.seriesID" class="form-group d-flex justify-content-center w-100">
+                        <div class="pb-4">
+                            <div class="radio-inline">
+                                <label class="radio">
+                                    <input type="radio" name="savingRecurrencyOption" [value]="false"
+                                        [(ngModel)]="updateEventSeries">
+                                    <span></span> Update only this event
+                                </label>
+                                <label class="radio">
+                                    <input type="radio" name="savingRecurrencyOption" [value]="true"
+                                        [(ngModel)]="updateEventSeries">
+                                    <span></span>{{"UpdateEventSeries" | localize}}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <button type="button" class="btn btn-light-primary mr-3" (click)="closeOrShowDiscardWarning()">
+                            {{"Cancel" | localize}}
+                        </button>
+                        <app-save-button classname="btn btn-primary" text="{{'Save' | localize}}"
+                            (onClickEvent)="saveEvent()" #savebutton [disabled]="!eventForm.form.valid">
+                        </app-save-button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<goddard-confirmation-modal #discardChangesModal (accept)="discardChanges()" (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges" [useDefaultsForType]="true">
+</goddard-confirmation-modal>
+<!--Discard Modal -->
+
+<goddard-confirmation-modal #requiredWeeklyDayModal
+    (accept)="requiredWeeklyDayModal.hide()"
+    (reject)="requiredWeeklyDayModal.hide()"
+    [modalType]="modalType.Warning" [useDefaultsForType]="true"
+    [messageBody]="l('{0}IsRequired', 'At least one day')"
+    [okButtonText]="l('Ok')">
+</goddard-confirmation-modal>
+<!--required weekly day Warning Modal -->

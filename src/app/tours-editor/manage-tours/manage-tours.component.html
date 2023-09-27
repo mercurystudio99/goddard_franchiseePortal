@@ -1,0 +1,191 @@
+<div class="container pt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        {{"Scheduled Tours" | localize}}
+                    </h3>
+                    <button class="btn gsi-btn-cta" (click)="clearLeadsSearchAndOpenModal(undefined)">
+                        <goddard-icons [iconClass]="['gsi-icon_white mr-2']" [iconSize]="[20]"
+                            [iconName]="['Outline-Plus']">
+                        </goddard-icons>
+                        <span>{{"Add a Tour" | localize}}</span>
+                    </button>
+                </div>
+                <div class="border-bottom border-gray-light px-7 py-3">
+                    <filter-tours [defaultStatus]="_defaultStatus"></filter-tours>
+                </div>
+                <div class="card-body px-5 py-0 position-relative">
+                    <ngx-spinner class="gsi-content-spinner" name="tours-table" type="ball-clip-rotate" size="medium"
+                        color="#987456" template="<div class='gsi-spinner'><span class='gsi-pulse-white'></span></div>">
+                    </ngx-spinner>
+                    <div *ngIf="tours">
+                        <p-table #dataTable class="gsi-table gsi-table--fixed gsi-table-tours gsi-ta"
+                            [value]="tours"
+                            [lazy]="true"
+                            [paginator]="toursCount > maxToursPerPage"
+                            [rows]="maxToursPerPage"
+                            [totalRecords]="toursCount"
+                            (onLazyLoad)="onLazyLoadScheduledTours($event)">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th pSortableColumn="startDateTime">
+                                        {{"Date & Time" | localize }}
+                                        <p-sortIcon field="startDateTime"></p-sortIcon>
+                                    </th>
+                                    <th pSortableColumn="type">
+                                        {{"Tour Type" | localize }}
+                                        <p-sortIcon field="type"></p-sortIcon>
+                                    </th>
+                                    <th pSortableColumn="lead.firstName">
+                                        {{"First Name" | localize }}
+                                        <p-sortIcon field="lead.firstName"></p-sortIcon>
+                                    </th>
+                                    <th pSortableColumn="lead.lastName">
+                                        {{"Last Name" | localize }}
+                                        <p-sortIcon field="lead.lastName"></p-sortIcon>
+                                    </th>
+                                    <th>
+                                        {{"Child Name" |localize }}
+                                    </th>
+                                    <th>
+                                        {{"Child Age" | localize }}
+                                    </th>
+                                    <th pSortableColumn="guide.name">
+                                        {{"Tour Guide" | localize }}
+                                        <p-sortIcon field="guide.name"></p-sortIcon>
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-tour>
+                              <tr [ngClass]="tourIndicatorClass(tour)">
+                                    <td>
+                                        <span class="p-column-title" data-id="{{tour.id}}"> {{l('startDateTime')}}</span>
+                                        {{ getTourDateTime(tour.startDateTime) }}
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title">{{"tourType" | localize}}</span>
+                                        {{ getTourType(tour.type)}}
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title"> {{"firstName" | localize }}</span>
+                                        {{tour.lead.firstName}}
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title"> {{"lastName" | localize }}</span>
+                                        {{tour.lead.lastName}}
+                                    </td>
+                                    <td [innerHtml]="childrenNames(tour)">
+                                        <span class="p-column-title"> {{"childName" | localize }}</span>
+                                    </td>
+                                    <td [innerHtml]="childrenAges(tour)">
+                                        <span class="p-column-title">{{"childAge" | localize }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title"> {{"tourGuide" | localize }}</span>
+                                        {{tour?.guide?.name}}
+                                    </td>
+                                    <td class="text-right">
+                                        <span class="cursor-pointer text-tertiary font-weight-bold" (click)="clearLeadsSearchAndOpenModal(tour.id)"  type="button">View/Edit</span>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                        <p class="lead text-muted text-center py-5" *ngIf="tours.length == 0 && !filtersAreDefault">
+                            {{"No results match your search criteria" | localize}}
+                        </p>
+                    </div>
+
+                    <div class="row justify-content-end py-3">
+                        <div class="col-12 d-flex">
+                            <div class="d-flex align-items-center mr-5">
+                                <span class="gsi-table-tours_new-tour-info mr-2"></span>
+                                <span>{{"New" | localize}}</span>
+                            </div>
+                            <div class="d-flex align-items-center mr-5">
+                                <span class="gsi-table-tours_past-due-tour-info mr-2"></span>
+                                <span>{{"Past Due" | localize}}</span>
+                            </div>
+                            <span class="small">
+                                *{{"Times are in local school timezone" | localize}}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <edit-tours-modal #editToursModal (save)="onSaveTour($event)" (createLead)="openNewLeadModal()"></edit-tours-modal>
+    <edit-lead-modal #editLeadModal (save)="onSaveLead($event)" (back)="openModal(undefined)"></edit-lead-modal>
+
+    <div appBsModal #newLeadSuccessModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+        [config]="{backdrop: 'static'}">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div #newLeadMessage class="w-100" *ngIf="lead">
+                    <div class="modal-body px-20">
+                        <div class="w-100 border border-light border-1 rounded p-10">
+                            <p class="font-ramona text-uppercase text-primary mb-0 py-3">
+                                {{"Success! A new lead has been created." | localize}}
+                            </p>
+                            <p-table #dataTable class="gsi-table gsi-table-tours gsi-ta" [value]="[lead]">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th>
+                                            {{"First Name" | localize }}
+                                        </th>
+                                        <th>
+                                            {{"Last Name" | localize }}
+                                        </th>
+                                        <th>
+                                            {{"Phone" | localize }}
+                                        </th>
+                                        <th>
+                                            {{"Email" | localize }}
+                                        </th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-lead>
+                                    <tr>
+                                        <td>
+                                            <span class="p-column-title"> {{"firstName" | localize }}</span>
+                                            {{lead?.firstName}}
+                                        </td>
+                                        <td>
+                                            <span class="p-column-title"> {{"lastName" | localize }}</span>
+                                            {{lead?.lastName}}
+                                        </td>
+                                        <td>
+                                            <span class="p-column-title"> {{ "phone" | localize }}</span>
+                                            {{lead?.primaryPhone}}
+                                        </td>
+                                        <td>
+                                            <span class="p-column-title"> {{"emailAddress" | localize }}</span>
+                                            {{lead?.emailAddress}}
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+
+                    </div>
+                    <div class="modal-footer d-flex justify-content-center">
+                        <button type="button" class="btn btn-outline-info border-2 text-primary"
+                            (click)="displayNotYetImplemented()">
+                            {{" Edit" | localize}} </button>
+                        <button type="button" class="btn btn-light-primary" [attr.aria-label]="l('Close')"
+                            (click)="closeLeadSuccessModal()">
+                            {{"Close" | localize}}
+                        </button>
+                        <button type="button" class="btn btn-primary" (click)="addTour()">
+                            {{"Add Tour" | localize}}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--New Lead Message-->

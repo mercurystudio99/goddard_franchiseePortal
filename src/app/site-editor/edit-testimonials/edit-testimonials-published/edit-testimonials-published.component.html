@@ -1,0 +1,64 @@
+<div class="container-fluid py-8" *ngIf="testimonials">
+    <p>
+        <i class="text-warning fa fa-exclamation-triangle"></i>
+        {{l('Limit_Accessible_Testimonials')}}
+    </p>
+    <p-table class="gsi-table gsi-table_sortable" #dataTablTestimonials [value]="testimonials"
+        [reorderableColumns]="true" (onRowReorder)="onReorderTestimonial($event)">
+        <ng-template pTemplate="header">
+            <tr>
+                <th></th>
+                <th>Child(ren)
+                    <goddard-tooltip [toolTipPath]="tooltips.TESTIMONIALS_PUBLISHED"></goddard-tooltip>
+                </th>
+                <th>Parent <br> <small>Relationship</small></th>
+                <th>Program</th>
+                <th class="content-cell">Content</th>
+                <th class="options-cell"></th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-testimonial let-index="rowIndex">
+            <tr [pReorderableRow]="index">
+                <td class="text-center">
+                    <img class="gsi-list-drag-icon" src="/assets/metronic/themes/theme7/images/gsi_drag_icon.svg"
+                        pReorderableRowHandle>
+                </td>
+                <td>
+                    <span class="p-column-title">{{"Children" | localize}}</span>
+                    {{testimonial.children}}
+                </td>
+                <td>
+                    <span class="p-column-title">{{"Parent" | localize}}</span>
+                    {{testimonial.displayName}}
+                </td>
+                <td>
+                    <span class="p-column-title">{{"Program" | localize}}</span>
+                    {{testimonial.program}}
+                </td>
+                <td>
+                    <span class="p-column-title">{{"Content" | localize}}</span>
+                    {{(testimonial.content?.length > maxContentLength)
+                    ? (testimonial.content | slice:0:maxContentLength) + '...'
+                    :(testimonial.content)}}
+                </td>
+
+                <td class="text-right">
+                    <button [ngClass]="['btn btn-sm btn-default']" (click)="unpublish(testimonial.id)">
+                        <span class="d-flex">
+                            <goddard-icons [iconClass]="['gsi-icon_white mr-2']" [iconSize]="[15]"
+                                [iconName]="['Outline-Null']"></goddard-icons>
+                            <span>{{"Unpublish" | localize}}</span>
+                        </span>
+                    </button>
+
+                    <button class="btn btn-sm btn-primary" (click)="showEditModal(testimonial.id)">
+                        <goddard-icons [iconClass]="['gsi-icon_white']" [iconSize]="[20]"
+                            [iconName]="['Outline-Pencil']"></goddard-icons>
+                    </button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+
+<edit-testimonial-modal #editTestimonialModal (save)="onSaveTestimonial($event)"></edit-testimonial-modal>

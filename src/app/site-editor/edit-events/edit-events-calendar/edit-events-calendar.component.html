@@ -1,0 +1,41 @@
+<div [@routerTransition]>
+    <div *ngIf="isLoad" class="container-fluid py-8">
+        <div class="row">
+            <div class="col-12">
+                <full-calendar #calendar class="gsi-school-event-calendar"
+                    [options]="GsiCalendarOptions">
+                </full-calendar>
+            </div>
+        </div>
+    </div>
+</div>
+
+<goddard-confirmation-modal #deleteEventSeriesModal
+    (reject)="reject($event)"
+    (accept)="delete(true)"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true"
+    [title]="l('WhatWouldYouLikeToDo')"
+    [messageBody]="l('DeleteEventSeriesMessage')"
+    [okButtonText]="l('ThisAndFutureEvents')"
+    [cancelButtonText]="l('SingleEvent')">
+</goddard-confirmation-modal>
+<!--Delete Modal -->
+<goddard-confirmation-modal
+    #removeEventConfirmModal
+    (accept)="eventRemoveAccepted()"
+    (reject)="eventRemoveRejected()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true"
+    [title]="l('AreyouSure')"
+    [messageBody]="l('EventDeleteWarningMessage', ': '+title)"
+    [okButtonText]="l('Yes')"
+    [cancelButtonText]="l('Cancel')">
+</goddard-confirmation-modal>
+<!--Delete Modal -->
+
+<edit-event-modal #EventModal (save)="onSaveEvent($event)"></edit-event-modal>
+<!--Edit Modal -->
+
+<event-template-modal #EventTemplateModal (save)="onSaveEventTemplate($event)"></event-template-modal>
+<!--Event Template Modal -->

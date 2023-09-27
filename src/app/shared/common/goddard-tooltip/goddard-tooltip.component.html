@@ -1,0 +1,47 @@
+<div class="d-inline-block align-middle ml-2"  *ngIf="isAvailableContent()">
+    <i  class="gsi-tooltip-icon la la-question-circle" data-toggle="popover" data-html="true" [popover]="popTemplate"
+        [outsideClick]="true"  containerClass="gsi-tooltip-container">
+    </i>
+    <ng-template #popTemplate>
+        <div>
+            <p class="lead-md  font-weight-bolder text-primary mb-0">
+                {{tooltipDto.title}}
+            </p>
+            <p>
+             {{tooltipDto.subtitle}}
+            </p>
+            <div class="gsi-tooltip-container__desc" [innerHTML]="tooltipDto.description"></div>
+
+           <div class="w-90 position-relative m-auto">
+                <p-carousel styleClass="gsi-card-carousel mb-3" [value]="tooltipDto.images"
+                [numVisible]="1" [numScroll]="1" [showNavigators]="tooltipDto.images?.length > 1">
+                <ng-template let-image pTemplate="item">
+                    <div class="px-3 d-flex w-100 align-content-stretch">
+                        <div
+                            class="w-100 d-flex align-content-stretch flex-wrap rounded overflow-hidden border border-dark rounded">
+                            <div class="d-flex align-items-center w-100 overflow-hidden">
+                                <img [src]="image" class="w-100" />
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </p-carousel>
+           </div>
+           <div class="w-90 position-relative m-auto">
+              <p-carousel styleClass="gsi-card-carousel" [value]="tooltipDto.videos"
+                 [numVisible]="1" [numScroll]="1"  [showNavigators]="tooltipDto.videos?.length > 1">
+                <ng-template let-video pTemplate="item">
+                    <div class="px-3 d-flex w-100 align-content-stretch">
+                        <div class="border border-dark rounded w-100">
+                            <video [src]="video" class="w-100" controls>
+                            </video>
+                        </div>
+                    </div>
+                </ng-template>
+            </p-carousel>
+           </div>
+
+    </div>
+
+    </ng-template>
+</div>

@@ -1,0 +1,78 @@
+<div class="login-form" [@routerTransition]>
+    <div class="pb-13 pt-lg-0 pt-5">
+        <h3 class="font-weight-bolder text-dark font-size-h4 font-size-h1-lg">
+            {{ 'LogIn' | localize }}
+        </h3>
+    </div>
+    <!--begin::Form-->
+    <form #loginForm="ngForm" class="login-form form" method="post" method="post" (ngSubmit)="login()">
+
+        <div class="col-12 text-center pb-5" *ngIf="!isNativeLogin">
+            <p>
+                <i class="text-warning fa fa-exclamation-triangle"></i>
+                {{ (sessionLoaded && !_school ? l('Unauthorized') : l('Login_Redirect_Message')) }}
+            </p>
+        </div>
+
+        <div class="form-group" *ngIf="isNativeLogin">
+            <input #userNameOrEmailAddressInput="ngModel"
+                [(ngModel)]="loginService.authenticateModel.userNameOrEmailAddress" autoFocus
+                class="form-control form-control-solid h-auto py-7 px-6 rounded-lg font-size-h6" type="text"
+                autocomplete="new-password" placeholder="{{'UserNameOrEmail' | localize}} *"
+                name="userNameOrEmailAddress" required [disabled]="!isNativeLogin" />
+            <validation-messages [formCtrl]="userNameOrEmailAddressInput" *ngIf="!userNameOrEmailAddressInput.touched">
+            </validation-messages>
+        </div>
+
+        <div class="form-group" *ngIf="isNativeLogin">
+            <input #passwordInput="ngModel" [(ngModel)]="loginService.authenticateModel.password"
+                class="form-control form-control-solid h-auto py-7 px-6 rounded-lg font-size-h6" type="password"
+                autocomplete="new-password" placeholder="{{'Password' | localize}} *" name="password" required
+                maxlength="32" [disabled]="!isNativeLogin" />
+            <validation-messages [formCtrl]="passwordInput" *ngIf="!passwordInput.touched"></validation-messages>
+        </div>
+
+        <div class="form-group d-flex justify-content-between mt-4" *ngIf="isNativeLogin">
+            <label class="checkbox checkbox-outline">
+                <input [(ngModel)]="loginService.rememberMe" type="checkbox" name="rememberMe" value="true" />
+                <span class="ml-2"></span>
+                {{ 'RememberMe' | localize }}
+            </label>
+            <a routerLink="/account/forgot-password" id="forget-password"
+                class="text-primary font-size-h6 font-weight-bolder text-hover-primary">
+                {{"ForgotPassword" | localize}}
+            </a>
+        </div>
+
+        <div class="pb-lg-0 pb-5" *ngIf="isNativeLogin">
+            <button type="submit" class="btn btn-block btn-primary font-weight-bolder font-size-h6 px-8 py-4 my-3 mr-3"
+                [disabled]="!isNativeLogin || !loginForm.form.valid">{{"LogIn" | localize}}</button>
+        </div>
+        <div class="pb-lg-0 pb-5" *ngIf="isNativeLogin">
+            <a href="/" class="btn btn-block btn-primary font-weight-bolder font-size-h6 px-8 py-4 my-3 mr-3">{{"Try SSO Login" | localize}}</a>
+        </div>
+    </form>
+
+    <!--end::Form-->
+
+    <!--begin::Options-->
+    <div class="mt-10 mb-2 d-none"
+        *ngIf="(multiTenancySideIsTeanant || !isMultiTenancyEnabled) && loginService.externalLoginProviders.length > 0">
+        <div class="divider">
+            <span></span>
+            <span>{{ 'LoginWith' | localize }}</span>
+            <span></span>
+        </div>
+    </div>
+
+    <div class="pb-lg-0 pb-5 login__options d-none" *ngIf="(multiTenancySideIsTeanant || !isMultiTenancyEnabled)
+                             && loginService.externalLoginProviders.length > 0">
+        <a *ngFor="let provider of loginService.externalLoginProviders"
+            class="btn btn-sm btn-light-primary font-weight-bolder py-2 mb-2 ml-0 mr-2"
+            (click)="externalLogin(provider)" title="{{provider.name}}">
+            <i class="fab fa-{{provider.icon}}"></i>
+            {{provider.name}}
+        </a>
+    </div>
+    <!--end::Options-->
+</div>

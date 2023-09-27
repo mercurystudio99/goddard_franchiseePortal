@@ -1,0 +1,27 @@
+.gsi-table.gsi-table_sortable td {
+    background-color: var(--white);
+    border: 1px solid var(--gray);
+    font-size: 1.125rem;
+    line-height: 1.1;
+    padding: .875rem 1.5rem;
+}
+
+.gsi-table.gsi-table_sortable td small {
+    font-size: .875rem;
+}
+
+.gsi-table.gsi-table_sortable td:first-child {
+    border-right: none;
+    border-radius: .5rem 0 0 .5rem;
+    padding-right: .75rem;
+}
+
+.gsi-table.gsi-table_sortable td:last-child {
+    border-left: none;
+    border-radius: 0 .5rem .5rem 0;
+    padding-left: .75rem;
+}
+
+:host ::ng-deep .gsi-table .p-datatable table {
+    border-spacing: 0 .875rem;
+}

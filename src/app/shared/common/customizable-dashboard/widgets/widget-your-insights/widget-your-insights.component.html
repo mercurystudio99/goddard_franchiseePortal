@@ -1,0 +1,22 @@
+<div class="card card-custom h-100">
+    <div class="card-header align-items-center border-0">
+        <h3 class="card-title align-items-start flex-column">
+            <span class="font-weight-bolder font-ramona">
+                {{ "YOUR INSIGHTS & UPDATES" | localize }}
+            </span>
+        </h3>
+    </div>
+    <div class="card-body" [busyIf]="loading">
+        <div class="table-responsive">
+            <p class="grd-border-left border-info pl-3" *ngFor='let insight of insightsAndUpdates'>
+                <a *ngIf='insight?.url' [href]='insight?.url' target="_blank">
+                    <b>{{insight?.header | localize}}</b>
+                </a>
+                <span *ngIf="!insight?.url"><b>{{insight?.header | localize}}</b></span>
+                <br />
+                <span>{{insight?.body}}</span>
+            </p>
+            <p *ngIf='insightsAndUpdates.length == 0'>{{"There are no updates yet" | localize}}</p>
+        </div>
+    </div>
+</div>

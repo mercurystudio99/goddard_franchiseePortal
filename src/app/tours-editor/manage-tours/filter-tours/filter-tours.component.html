@@ -1,0 +1,141 @@
+<div class="gsi-tours-filters row">
+    <div class="col-12 col-lg-10 d-flex align-items-center position-relative">
+        <div class="form-control form-control-select text-primary gsi-fs-6 w-auto mr-4 position-relative"
+            data-html="true"
+            containerClass="gsi-tour-filter-popover gsi-tour-filter-popover--date"
+            [placement]="'bottom left'"
+            [outsideClick]="true"
+            [popover]="tourFilterDate"
+            [adaptivePosition]="false"
+            container="body">
+            Date
+        </div>
+        <div class="form-control form-control-select text-primary gsi-fs-6 w-auto mr-4"
+            data-html="true"
+            containerClass="gsi-tour-filter-popover"
+            [placement]="'bottom left'"
+            [outsideClick]="true"
+            [popover]="tourFilterType"
+            [adaptivePosition]="false"
+            container="body">
+            Type
+        </div>
+        <div class="form-control form-control-select text-primary gsi-fs-6 w-auto mr-4"  data-toggle="popover"
+            data-html="true"
+            containerClass="gsi-tour-filter-popover"
+            [placement]="'bottom left'"
+            [outsideClick]="true"
+            [popover]="tourFilterGuide"
+            [adaptivePosition]="false"
+            container="body">
+           Guide
+        </div>
+        <div class="form-control form-control-select text-primary gsi-fs-6 w-auto mr-4" data-toggle="popover"
+            data-html="true"
+            containerClass="gsi-tour-filter-popover gsi-tour-filter-popover--date"
+            [placement]="'bottom left'"
+            [outsideClick]="true"
+            [popover]="tourFilterPreferedDate"
+            [adaptivePosition]="false"
+            container="body">
+            Preferred Start Date
+        </div>
+        <div class="form-control form-control-select text-primary gsi-fs-6 w-auto mr-4" data-toggle="popover"
+            data-html="true"
+            containerClass="gsi-tour-filter-popover"
+            [placement]="'bottom left'"
+            [outsideClick]="true"
+            [popover]="tourFilterPrograms"
+            [adaptivePosition]="false"
+            container="body">
+            Programs of Interest
+        </div>
+        <span [ngClass]="{
+            'gsi-tours-filters__clear': true,
+            'disabled': filtersAreDefault
+          }"
+          role="button"
+          type="button"
+          (click)="clearFilters()">Clear Filters</span>
+    </div>
+    <div class="col-12 col-lg-2">
+        <div class="form-control-search">
+            <input #tourFilterNameInput (keyup.enter)="tourNameSearch($event.target.value)" placeholder="Search name" class="form-control w-100" />
+            <button (click)="tourNameSearch()" class="form-control-search__trigger">
+                <i class="la la-search"></i>
+            </button>
+        </div>
+    </div>
+    <div class="col-12 d-flex pt-2" *ngIf="this._toursEditorService.filter">
+        <div class="bg-gray-medium d-flex text-dark-75 border border-1 border-gray-light px-2 mr-5 rounded" *ngFor="let item of _filterBreadcrumbs">
+           <span class="d-block mr-2">{{item.displayValue}}</span>
+           <span class="small" rol="button" type="button" (click)="removeFilterItem(item.key, item.value)">&#x2716;</span>
+        </div>
+    </div>
+</div>
+
+<!--MAIN FILTERS-->
+<ng-template #tourFilterDate>
+    <input type="text"
+        class="form-control gsi-datepicker-form-control border-primary"
+        name="tour-date-range-option_date-selection"
+        placeholder="MM/DD/YYYY - MM/DD/YYYY"
+        [(ngModel)]="tourRangeDates"
+        (focus)="toggleDatepicker(true)" />
+    <bs-daterangepicker-inline  *ngIf="showDatepicker"
+        (bsValueChange)="onSelectDateRange($event, 'tour')"
+        [bsConfig]="bsConfig"></bs-daterangepicker-inline>
+</ng-template>
+<!--DATE POPOVER-->
+
+<ng-template #tourFilterType>
+   <div class="d-flex flex-column">
+        <label class="checkbox checkbox-solid checkbox-lg mb-3" *ngFor="let item of _typesList" for="types-{{item.value}}">
+            <input type="checkbox" name="types-{{item.value}}" id="types-{{item.value}}"
+                [value]="item.value"
+                (change)="onChangeCheckboxFilter($event,'types')"
+                [checked]="isFilterOptionsSelected(item.value, 'types')">
+            <span></span> {{item.text | localize}}
+        </label>
+   </div>
+</ng-template>
+<!--TYPE POPOVER-->
+
+<ng-template #tourFilterGuide>
+    <div class="d-flex flex-column">
+       <label class="checkbox checkbox-solid checkbox-lg mb-3" *ngFor="let item of guides" for="{{item.id}}">
+            <input type="checkbox" name="{{item.name}}" id="{{item.id}}"
+                [value]="item.id"
+                (change)="onChangeCheckboxFilter($event, 'guideIds')"
+                [checked]="isFilterOptionsSelected(item.id, 'guideIds')">
+            <span></span> {{item.name | localize}}
+        </label>
+    </div>
+ </ng-template>
+ <!--GUIDE POPOVER-->
+ <ng-template #tourFilterPreferedDate>
+    <input type="text"
+        class="form-control gsi-datepicker-form-control border-primary"
+        name="tour-date-range-option_date-selection"
+        placeholder="MM/DD/YYYY - MM/DD/YYYY"
+        [(ngModel)]="preferredRangeDates"
+        (focus)="toggleDatepicker(true)" />
+    <bs-daterangepicker-inline  *ngIf="showPreferedDatepicker"
+        (bsValueChange)="onSelectDateRange($event, 'lead')"
+        [bsConfig]="bsConfig"></bs-daterangepicker-inline>
+</ng-template>
+<!--PREFERED START DATE POPOVER-->
+
+<ng-template #tourFilterPrograms>
+    <div class="d-flex flex-column">
+        <label class="checkbox checkbox-solid checkbox-lg mb-3" for="{{item.name}}"
+            *ngFor="let item of programsOfInterest">
+            <input type="checkbox" name="{{item.name}}" id="{{item.name}}"
+                [value]="item.name"
+                (change)="onChangeCheckboxFilter($event, 'programsOfInterest')"
+                [checked]="isFilterOptionsSelected(item.name, 'programsOfInterest')">
+            <span></span> {{item.name | localize}}
+        </label>
+    </div>
+ </ng-template>
+ <!--GUIDE POPOVER-->

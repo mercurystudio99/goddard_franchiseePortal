@@ -1,0 +1,109 @@
+<div class="container pt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        {{"Careers" | localize}}
+                    </h3>
+                    <button class="btn gsi-btn-cta" (click)="openModal(undefined)">
+                        <goddard-icons [iconClass]="['gsi-icon_white mr-2']" [iconSize]="[20]"
+                            [iconName]="['Outline-Plus']"></goddard-icons>
+                        <span>{{"Add Career" | localize}}</span>
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="container-fluid py-8" *ngIf="careers">
+                        <p-table #dataTable class="gsi-table" [value]="careers">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>
+                                        <span pSortableColumn="position">{{"Position Name" | localize }}</span>
+                                        <goddard-tooltip [toolTipPath]="tooltips.CAREERS_POSITION"></goddard-tooltip>
+                                    </th>
+                                    <th pSortableColumn="positionType">
+                                        {{"Position Type" | localize }}
+
+                                    </th>
+                                    <th>
+                                      <span pSortableColumn="isSystemGenerated">{{"System Generated " | localize }}</span>
+                                      <goddard-tooltip [toolTipPath]="tooltips.CAREERS_SYSTEM_GENERATED_GRID_COL"></goddard-tooltip>
+                                    </th>
+                                    <th>
+                                      <span  pSortableColumn="publishDate">{{"Posting Date" | localize }}</span>
+                                      <goddard-tooltip [toolTipPath]="tooltips.CAREERS_POSTING_DATE"></goddard-tooltip>
+                                    </th>
+
+                                    <th pSortableColumn="shortDescription" class="content-cell">
+                                        {{"Description" |localize }}
+                                    </th>
+                                    <th>
+                                        <span pSortableColumn="isActive">{{"Active" | localize }}</span>
+                                        <goddard-tooltip [toolTipPath]="tooltips.CAREERS_ACTIVE"></goddard-tooltip>
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-career>
+                                <tr>
+                                    <td>
+                                        <span class="p-column-title"> {{l('Position')}}</span>
+                                        {{career.position}}
+                                    </td>
+                                    <td><span class="p-column-title">
+                                            {{"Position Type" | localize}}
+                                        </span>{{career.positionType === 1 ? "Full-Time" : "Part-Time" | localize}}
+                                    </td>
+                                    <td> <span class="p-column-title"> {{"System Generated " | localize
+                                            }}</span>{{career.isSystemGenerated ? "Yes" : "No" | localize}}</td>
+                                    <td> <span class="p-column-title"> {{"Date of Posting" | localize
+                                            }}</span>{{career.publishDate ? (career.publishDate | date:'shortDate') : ""
+                                        | localize}}</td>
+                                    <td [innerHTML]="(career.shortDescription?.length > maxDescriptionLength)
+                                        ? (career.shortDescription | slice:0:maxDescriptionLength) + '...'
+                                        : (career.shortDescription)">
+                                        <span class="p-column-title">
+                                            {{"Description" |localize }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="p-column-title"> {{"Active" | localize }}</span>
+                                        <span
+                                            [ngClass]="[career.showOnPublicWebsite ? 'badge badge-success' :  'badge badge-white']">
+                                            {{career.showOnPublicWebsite ? "Yes" : "No" | localize}}
+                                        </span>
+                                    </td>
+                                    <td class="text-right">
+                                        <button class="btn btn-sm btn-primary" (click)="openModal(career.id)">
+                                            <goddard-icons [iconClass]="['gsi-icon_white']" [iconSize]="[20]"
+                                                [iconName]="['Outline-Pencil']"></goddard-icons>
+                                        </button>
+
+                                        <button *ngIf="!career.isSystemGenerated" class="btn btn-sm btn-secondary"
+                                            (click)="onDeleteCareer(career.id)">
+                                            <goddard-icons [iconClass]="['gsi-icon_white']" [iconSize]="[20]"
+                                                [iconName]="['Outline-Trash']"></goddard-icons>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<edit-careers-modal #editCareersModal (save)="onSaveCareer($event)"></edit-careers-modal>
+<goddard-confirmation-modal
+    #removeCareerConfirmModal
+    (accept)="careerRemoveAccepted()"
+    (reject)="careerRemoveRejected()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true"
+    [messageBody]="l('CareerDeleteWarningMessage')"
+    [okButtonText]="l('Yes')"
+    [cancelButtonText]="l('Cancel')">
+</goddard-confirmation-modal>
+<!--Delete Career Modal -->

@@ -1,0 +1,69 @@
+<div class="container pt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        {{"Edit School Features" | localize}}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <fieldset *ngFor="let schoolFeaturesCategory of allFeatures | groupBy: 'category'; let lastItem = last" [class.mb-6]="!lastItem">
+                        <legend class="mb-3">
+                            {{schoolFeaturesCategory.key | localize}}
+                            <goddard-tooltip [toolTipPath]="featureToolTip(schoolFeaturesCategory.key)"></goddard-tooltip>
+                        </legend>
+                        <div class="border pt-6 px-6 rounded">
+                            <div *ngFor="let schoolFeature of schoolFeaturesCategory.value" class="checkbox-inline">
+                                <label for="{{schoolFeaturesCategory.key | localize}}-{{schoolFeature.id}}"
+                                    class="checkbox checkbox-lg">
+                                    <input type="checkbox"
+                                        id="{{schoolFeaturesCategory.key | localize}}-{{schoolFeature.id}}"
+                                        (change)="selectFeature(schoolFeature)"
+                                        [checked]="isFeatureSelected(schoolFeature.alternateId)">
+                                    <span></span> {{schoolFeature.name | localize}}
+                                </label>
+                                <goddard-tooltip [toolTipPath]="featureToolTip(schoolFeature.name)"></goddard-tooltip>
+                                <ng-container *ngIf="isFeatureSelected(schoolFeature.alternateId)">
+                                    <ng-container *ngFor="let subFeature of getSubfeatures(schoolFeature)">
+                                        <label for="{{schoolFeaturesCategory.key | localize}}-{{subFeature.id}}"
+                                            class="checkbox checkbox-lg">
+                                            <input type="checkbox"
+                                                id="{{schoolFeaturesCategory.key | localize}}-{{subFeature.id}}"
+                                                (change)="selectFeature(subFeature)"
+                                                [checked]="isFeatureSelected(subFeature.alternateId)">
+                                            <span></span> {{subFeature.name | localize}}
+                                        </label>
+                                    </ng-container>
+                                </ng-container>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="card-footer">
+                    <button class="btn btn-tertiary mr-3" (click)="showDiscardChangesModal()">
+                        {{"Cancel" | localize}}
+                    </button>
+                    <app-save-button text="Save & Publish" (onClickEvent)="saveFeatures()" #saveButton [disabled]="!pendingChanges()">
+                    </app-save-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<goddard-confirmation-modal #discardChangesModal
+    (accept)="discardChanges()"
+    (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true">
+</goddard-confirmation-modal>
+<!--Discard Modal -->
+<goddard-confirmation-modal #noChangesModal
+    (accept)="noChanges()"
+    [modalType]="modalType.Warning"
+    [useDefaultsForType]="true"
+    [messageBody]="l('NoChangesMade')"
+    [okButtonText]="l('OK')">
+</goddard-confirmation-modal>
+<!--No Change Modal -->

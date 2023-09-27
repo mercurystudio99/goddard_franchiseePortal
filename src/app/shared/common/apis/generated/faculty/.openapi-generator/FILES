@@ -1,0 +1,15 @@
+.gitignore
+README.md
+api.module.ts
+api/api.ts
+api/facultyBios.service.ts
+configuration.ts
+encoder.ts
+git_push.sh
+index.ts
+model/facultyBios.ts
+model/facultyBiosPagedResponse.ts
+model/models.ts
+model/postFacultyBiosRequest.ts
+model/problemDetails.ts
+variables.ts

@@ -1,0 +1,97 @@
+<!--Editing Trigger-->
+<div appBsModal #testimonialModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static', ignoreBackdropClick: true}">
+    <div class="modal-dialog modal-dialog-centered  modal-lg">
+        <div class="modal-content">
+            <form #testimonialForm="ngForm" novalidate (ngSubmit)="saveTestimonial()">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{"Edit Testimonial" | localize}}
+                    </h5>
+                    <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="close()"></button>
+                </div>
+                <div class="modal-body" *ngIf="testimonial">
+                    <div class="row">
+                        <div class="col-12 py-3 text-right text-secondary">
+                            * {{"Required Fields" | localize}}
+                        </div>
+                    </div>
+                    <div class="w-100 rounded bg-light-primary p-4 mb-4">
+                        <div class="form-row">
+                            <div class="form-group  col-lg-3 col-xl-2">
+                                <b class="font-weight">{{"Parent" | localize}}</b>
+                            </div>
+                            <div class="form-group col-lg-8 col-xl-10">
+                                {{testimonial.parent}}
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group  col-lg-3 col-xl-2">
+                                <b class="font-weight">{{"Child(ren)" | localize}}</b>
+                            </div>
+                            <div class="form-group col-lg-8 col-xl-10">
+                                {{testimonial.children}}
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group  col-lg-3 col-xl-2">
+                                <b class="font-weight">{{"Relationship" | localize}}</b>
+                            </div>
+                            <div class="form-group col-lg-8 col-xl-10">
+                                {{testimonial.relationship}}
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group  col-lg-3 col-xl-2">
+                                <b class="font-weight"> {{"Content" | localize}}</b>
+                            </div>
+                            <div class="form-group col-lg-8 col-xl-10">
+                                {{testimonial.content}}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-12  col-md-8">
+                            <label [class]="testimonial.activeFlag ? ' gsi-required-field ' : '' " for="headline">
+                                {{"Program" | localize}}
+                            </label>
+                            <select id="program" name="program" class="form-control form-control-solid"
+                                #program="ngModel" placeholder="" [(ngModel)]="testimonial.program"
+                                [required]="testimonial.activeFlag">
+                                <option *ngFor="let program of programs" [value]="program">
+                                    {{program}}
+                                </option>
+                            </select>
+                            <validation-messages [formCtrl]="program"></validation-messages>
+                        </div>
+                        <div class="form-group col-12  col-md-4">
+                            <label class="gsi-required-field" for="headline">
+                                {{"Order Number" | localize}}
+                            </label>
+                            <input type="number" id="ordinal" name="ordinal" class="form-control form-control-solid"
+                                #ordinal="ngModel" placeholder="" [(ngModel)]="testimonial.ordinal" [required]="true"
+                                min="1" pattern="^[1-9][0-9]*$" (keypress)="allowNumbersOnly($event)">
+                            <validation-messages [formCtrl]="ordinal"></validation-messages>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-center">
+                    <button type="button" class="btn btn-light-primary" (click)="showDiscardChangesModal()">{{"Cancel" |
+                        localize}}</button>
+                    <app-save-button (onClickEvent)="saveTestimonial()" #saveButton
+                        [disabled]="!testimonialForm.form.valid">
+                    </app-save-button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<goddard-confirmation-modal #discardChangesModal
+    (accept)="discardChanges()"
+    (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true">
+</goddard-confirmation-modal>
+<!--Discard Modal -->

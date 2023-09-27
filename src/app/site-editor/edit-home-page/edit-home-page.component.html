@@ -1,0 +1,14 @@
+<div [@routerTransition]>
+    <div class="gsi-preview-container container px-0">
+        <div class="position-relative bg-white mt-5">
+            <app-edit-home-page-hero-image (save)="onSuccessSavingChanges($event)" #editHomeHeroImage>
+            </app-edit-home-page-hero-image>
+            <app-edit-home-page-cards (save)="onSuccessSavingChanges($event)" #editHomeIconCards>
+            </app-edit-home-page-cards>
+            <app-edit-home-image-cards (save)="onSuccessSavingChanges($event)" #editHomeImageCards>
+            </app-edit-home-image-cards>
+            <app-edit-teaser #editHomeTeaser (save)="onSuccessSavingChanges($event)"></app-edit-teaser>
+            <app-page-preview pageId="HomePage" #pagePreview (iframeIsResized)="setEditors($event)"></app-page-preview>
+        </div>
+    </div>
+</div>

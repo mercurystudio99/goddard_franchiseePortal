@@ -1,0 +1,35 @@
+﻿<div bsModal #createOrEditModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="createOrEditModal" aria-hidden="true" [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form *ngIf="active" #resourceLinkForm="ngForm" novalidate (ngSubmit)="save()" autocomplete="off">
+                <div class="modal-header">
+                    <h4 class="modal-title">
+                        <span *ngIf="resourceLink.id">{{l("EditResourceLink")}}</span>
+                        <span *ngIf="!resourceLink.id">{{l("CreateNewResourceLink")}}</span>
+                    </h4>
+                    <button type="button" class="close" (click)="close()" aria-label="Close" [disabled]="saving"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <input type="text" #ResourceLink_Text="ngModel" id="ResourceLink_Text" class="form-control"
+                        [(ngModel)]="resourceLink.text" name="Text" required disabled/>
+                        <validation-messages [formCtrl]="ResourceLink_Text"></validation-messages>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="ResourceLink_Url" class="gsi-required-field">{{l("Url")}}</label>
+                        <input type="text" #ResourceLink_Url="ngModel" id="ResourceLink_Url" class="form-control"
+                        [(ngModel)]="resourceLink.url" name="Url" required validateURI/>
+                        <validation-messages [formCtrl]="ResourceLink_Url"></validation-messages>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button [disabled]="saving" type="button" class="btn btn-default" (click)="close()">{{l("Cancel")}}</button>
+                    <button type="submit" class="btn btn-primary blue" [disabled]="!resourceLinkForm.form.valid" [buttonBusy]="saving" [busyText]="l('SavingWithThreeDot')"><i class="fa fa-save"></i> <span>{{l("Save")}}</span></button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,24 @@
+<div class="card card-custom h-100">
+    <div class="card-header align-items-center border-0">
+        <h3 class="card-title align-items-start flex-column">
+            <span class="font-weight-bolder font-ramona">
+                {{title | uppercase}}
+            </span>
+        </h3>
+    </div>
+    <div class="card-body" [perfectScrollbar]>
+        <ul [ngClass]="['topLinks']">
+            <li *ngFor="let link of resourceLinks" [ngClass]="['topToolLinks']">
+                <a class="text-primary d-flex align-items-center" href="{{link.url}}" angulartics2On="click"
+                    angularticsAction="{{link.text}}" angularticsLabel="{{link.url}}"
+                    angularticsCategory="Top Tools & Resources" target="{{link.isExternal ? '_blank' : '_self'}}">
+                    <goddard-icons [iconName]="link.icon"></goddard-icons>
+                    <b class="ml-2">{{link.text}}</b>
+                    <span *ngIf="link.isExternal" class="pl-2">
+                        <goddard-icons [iconSize]=[12] [iconName]="['External-Link']"></goddard-icons>
+                    </span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>

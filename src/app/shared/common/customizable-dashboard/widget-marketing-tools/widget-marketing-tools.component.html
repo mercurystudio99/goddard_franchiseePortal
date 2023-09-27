@@ -1,0 +1,5 @@
+<div [ngClass]="{'bg-white rounded p-2': pagePreview?.data}">
+    <site-marketing-tools-page-preview [disableAnchors]="false" pageId="dashboard.html" #pagePreview
+        (iframeIsResized)="setEditors($event)">
+    </site-marketing-tools-page-preview>
+</div>

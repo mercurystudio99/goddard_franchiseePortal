@@ -1,0 +1,14 @@
+<div class="{{cssClasses}}">
+    <span class="mr-3">
+        <i class="text-warning fa fa-exclamation-triangle"></i>
+    </span>
+    <span class="w-100 text-left">
+        {{l(linkText) | split: '{0}' : 0 }}
+        <br *ngIf="addLineBreak">
+        <a class="font-weight-bolder"
+            [href]="'mailto:'+ mailto + '?subject=' + requestSubject + (requestBody ? '&body=' + requestBody: '')">
+            {{l('ClickHere')}}
+        </a>
+        {{l(linkText) | split: '{0}' : 1 }}
+    </span>
+</div>

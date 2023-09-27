@@ -1,0 +1,10 @@
+.disabled-icon {
+    color: #999;
+    cursor: not-allowed;
+  }
+
+  .disabled-tag {
+    color: #999;
+    cursor: not-allowed;
+    pointer-events: none;
+  }

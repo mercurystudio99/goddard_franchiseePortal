@@ -1,0 +1,185 @@
+<div class="gsi-edit-trigger border-danger d-none" #editHomeHeroTrigger>
+    <button class="btn btn-danger py-3 px-4" (click)="openHeroCarouselEditModal()">
+        <span class="d-flex">
+            <goddard-icons [iconClass]="['mr-2']" [iconName]="['Edit-White']" [iconSize]="[16]">
+            </goddard-icons>
+            <span>
+                {{"Edit" | localize}}
+            </span>
+        </span>
+    </button>
+</div>
+<!--Editing Trigger-->
+<div appBsModal #selectHeroImageModal="bs-modal" class="modal modal-carousel fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-dialog-centered  modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <span>{{"EditContent" | localize}}</span>
+                    <goddard-tooltip [toolTipPath]="tooltips.HOMEPAGE_HERO_IMAGE_EDITOR"></goddard-tooltip>
+                </h5>
+                <button type="button" class="close" [attr.aria-label]="l('Close')"
+                    (click)="closeOrShowDiscardWarning()"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="container-fluid pt-5" *ngIf="renditions.length">
+                    <div class="row justify-content-center">
+                        <div class="col-12 pb-5">
+                            <p class="h5 font-ramona  text-primary">
+                                Selected Hero Images
+                            </p>
+                            <p>
+                                {{l('HeroImage_Select_Photos_SubHeader', [minSelectedHeroImages,
+                                minSelectedCarouselImages, maxSelectedHeroImages])}}
+                            </p>
+                        </div>
+                        <div class="col-12 p-0" *ngIf="carouselHeroImages">
+                            <div class="goddard-bg-cotton-candy w-100 rounded-lg  py-2 px-5">
+                                <p-carousel styleClass="gsi-card-carousel mx-5 px-5" [value]="carouselHeroImages"
+                                    [numVisible]="maxSelectedHeroImages/2" [numScroll]="maxSelectedHeroImages/2">
+                                    <ng-template let-card pTemplate="item">
+                                        <div class="p-3 w-100 d-flex align-items-center justify-content-center position-relative"
+                                            (onDrop)="dropImage(card.slideNumber-1)" pDroppable="renditions">
+                                            <span
+                                                class="gsi-card-carousel__delete-icon bg-primary rounded-circle p-1 border border-2 border-white position-absolute"
+                                                (click)="removeSelectedImage(card.slideNumber-1)"
+                                                *ngIf="card.rendition">
+                                                <i aria-hidden="true" class="text-white small ki ki-close"></i>
+                                            </span>
+                                            <div class="gsi-hero-image_drop rounded overflow-hidden border-dashed-primary d-flex align-items-center justify-content-center overflow-hidden"
+                                                (onDrop)="dropImage(card.slideNumber-1)"
+                                                pDroppable="carouselHeroImages">
+
+                                                <p class="text-white text-center text-weight-bold mb-0"
+                                                    *ngIf="!card.rendition">
+                                                    <span class="h2">
+                                                        {{card.slideNumber}}
+                                                        <sup>
+                                                            <span *ngIf="card.slideNumber == 1">st</span>
+                                                            <span *ngIf="card.slideNumber == 2">nd</span>
+                                                            <span *ngIf="card.slideNumber == 3">rd</span>
+                                                            <span *ngIf="card.slideNumber >= 4">th</span>
+                                                        </sup>
+                                                    </span>
+                                                    <br>
+                                                    <span>Hero Image</span>
+                                                </p>
+
+                                                <img pDraggable="carouselHeroImages"
+                                                    (onDragStart)="dragImageStart($event, card.rendition)"
+                                                    (onDragEnd)="dragImageEnd($event, card.rendition)"
+                                                    [src]="card.rendition.publishUrl" class="gsi-image-card_image"
+                                                    *ngIf="card.rendition" />
+                                            </div>
+                                        </div>
+                                    </ng-template>
+                                </p-carousel>
+                            </div>
+                        </div>
+                        <!--DROP CARD CAROUSEL-->
+
+                        <div [hidden]="validateSelectedImages()" class="col-12">
+                            <div class="form-control-feedback text-center" *ngIf="!validAmountOfImagesSelected()">
+                                {{l('Error_Invalid_Number_HeroImages_Msg', [minSelectedHeroImages,
+                                minSelectedCarouselImages, maxSelectedHeroImages])}}
+                            </div>
+                        </div>
+
+                        <div class="col-12 py-5 mt-5">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-1 text-right">
+                                    <i class="text-muted fa fa-arrow-up pr-2"></i>
+                                </div>
+                                <div class="col-10">
+                                    <span class="w-100 d-inline-block border-dashed-top"></span>
+                                </div>
+                                <div class="col-1">
+                                    <i class="text-muted fa fa-arrow-up pl-2"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 py-5">
+                            <p class="h5 font-ramona  text-primary">
+                                {{"Available Images" | localize}}
+                            </p>
+                            <p>
+                                {{l('HomePageHeroImagesIntro')}}
+                            </p>
+                        </div>
+                        <div class="col-12 gsi-p-tabs">
+                            <p-tabView>
+                                <p-tabPanel header="{{'School Hero Images' | localize}}">
+                                    <div class="d-flex gsi-row-cols-5" *ngIf="customImagesAvailable">
+                                        <div class="h-100 d-flex mb-3 overflow-hidden"
+                                            *ngFor="let heroImage of renditions | filter:{type:customImageType}">
+                                            <div [ngClass]="{selected: isSelected(heroImage)}"
+                                                class="gsi-hero-image_drop rounded overflow-hidden position-relative d-flex align-item-center justify-content-center mx-2"
+                                                pDraggable="renditions"
+                                                (onDragStart)="dragImageStart($event, heroImage)"
+                                                (onDragEnd)="dragImageEnd($event, heroImage)">
+                                                <img class="gsi-image-card_image" [src]="heroImage.publishUrl" />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <p class="w-100 text-center text-dark-75 pt-5" *ngIf="!customImagesAvailable">
+                                        {{"No school images available" | localize}}
+                                    </p>
+                                </p-tabPanel>
+                                <p-tabPanel header="{{'Generic Hero Images' | localize}}">
+                                    <div class="d-flex gsi-row-cols-5" *ngIf="heroImagesAvailable">
+                                        <div class="h-100 d-flex mb-3 overflow-hidden"
+                                            *ngFor="let heroImage of renditions | filter:{type:generalImageType}">
+                                            <div [ngClass]="{selected: isSelected(heroImage)}"
+                                                class="rounded overflow-hidden position-relative d-flex align-item-center justify-content-center w-100 h-100 mx-2"
+                                                pDraggable="renditions"
+                                                (onDragStart)="dragImageStart($event, heroImage)"
+                                                (onDragEnd)="dragImageEnd($event, heroImage)">
+                                                <img class="w-125 h-125" [src]="heroImage.publishUrl">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="container-fluid pb-5" *ngIf="!heroImagesAvailable">
+                                        <div class="row justify-content-center py-4">
+                                            <p class="h5 font-ramona  text-primary mb-5">
+                                                {{"NoImagesAvailable" | localize}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </p-tabPanel>
+                            </p-tabView>
+                        </div>
+
+                    </div>
+                </div>
+
+                <app-mailto-link mailto="creativeservices@goddardsystems.com" requestSubject="{{requestSubject}}"
+                    linkText="HeroImageSubmissionSentenceLink" [cssClasses]="'w-90 d-flex align-items-center mx-auto'"
+                    #mailToLink>
+                </app-mailto-link>
+
+            </div>
+            <div class="modal-footer d-flex justify-content-center">
+                <button type="button" class="btn btn-light-primary" (click)="closeOrShowDiscardWarning()">
+                    {{"Cancel" | localize}}</button>
+                <app-save-button text="Save & Publish" (onClickEvent)="saveHeroImageCarousel()" #saveButton
+                    [disabled]="!canSave()">
+                </app-save-button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Switch Image Modal -->
+
+<goddard-confirmation-modal #discardChangesModal
+    (accept)="discardChanges()"
+    (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges"
+    [useDefaultsForType]="true">
+</goddard-confirmation-modal>
+<!--Discard Modal -->

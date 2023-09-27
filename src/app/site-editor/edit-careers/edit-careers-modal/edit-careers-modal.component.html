@@ -1,0 +1,134 @@
+<!--Editing Trigger-->
+<div appBsModal #CareerModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-dialog-centered  modal-lg">
+        <div class="modal-content">
+            <form #careerForm="ngForm" novalidate (ngSubmit)="saveCareer()">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{(career?.id ? "Edit" : "Add") + " Career" | localize}}
+                    </h5>
+                    <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="close()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex w-100 justify-content-end" *ngIf="career?.isSystemGenerated">
+                        <div class="font-ramona font-weight-bolder text-uppercase text-secondary">
+                            {{"System Generated" | localize}}
+                            <goddard-tooltip [toolTipPath]="tooltips.CAREERS_SYSTEM_GENERATED_EDIT_TITLE"></goddard-tooltip>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 py-3 text-right text-secondary">
+                            * {{"Required Fields" | localize}}
+                        </div>
+                    </div>
+                    <div class="form-row align-items-center">
+                        <div class="form-group col-12">
+                            <label class="gsi-required-field"
+                                for="position">
+                                {{"Position Name" | localize}}
+                            </label>
+                            <input class="form-control form-control-solid" type="text" id="position" name="position"
+                                #position="ngModel" placeholder="" [required]="true"
+                                [disabled]="career?.isSystemGenerated" [ngModel]="career?.position"
+                                (ngModelChange)="career ? career.position=$event : null">
+                            <validation-messages [formCtrl]="position"></validation-messages>
+                        </div>
+                        <div class="form-group col-12 col-md-6">
+                            <label class="gsi-required-field"
+                                for="positionType">
+                                {{"Position Type" | localize}}
+                            </label>
+                            <select id="positionType" name="positionType" class="form-control form-control-solid"
+                                #positionType="ngModel" placeholder="" [disabled]="career?.isSystemGenerated"
+                                [ngModel]="career?.positionType"
+                                (ngModelChange)="career ? career.positionType=$event : null" [required]="true">
+                                <option *ngFor="let position of positionTypes" [value]="position.value">
+                                    {{position.text}}
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group col-12">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <label
+                                    class="gsi-required-field"
+                                    for="shortDescription">
+                                    {{"Description" | localize}}
+                                </label>
+                                <small>
+                                    {{ remainingCharacters() }} {{' Characters remaining' | localize}}
+                                </small>
+                            </div>
+                            <p-editor id="shortDescription" name="shortDescription" #shortDescription="ngModel"
+                                placeholder="" maxlength="{{maxDescriptionLength}}" [ngModel]="career?.shortDescription"
+                                (ngModelChange)="career ? career.shortDescription=$event : null"
+                                [style]="{'height':'120px'}" validateRequired trimStartToValidateRequired="<p>"
+                                trimEndToValidateRequired="</p>"
+                                (focusout)="careerForm.form.controls['shortDescription'].markAllAsTouched()"
+                                (onTextChange)="onDescriptionChange($event)" [formats]="editorFormatsWhitelist">
+                                <ng-template pTemplate="header">
+                                    <span class="ql-formats">
+                                        <button type="button" class="ql-bold" aria-label="Bold"></button>
+                                        <button type="button" class="ql-italic" aria-label="Italic"></button>
+                                    </span>
+                                </ng-template>
+                            </p-editor>
+                            <validation-messages [formCtrl]="shortDescription"></validation-messages>
+                        </div>
+
+                        <div class="form-group col-12">
+                            <label for="isActive">
+                                {{"Publish Options" | localize}}
+                            </label>
+                            <div class="radio-list">
+                                <label class="radio radio-accent radio-primary d-flex align-items-center mb-8">
+                                    <input type="radio" name="isActive" [checked]="career?.isActive"
+                                        (click)="onDisplayOnWebsiteClick()" [ngModel]="career?.isActive" [value]="true"
+                                        (ngModelChange)="career ? career.isActive=$event : null">
+                                    <span></span>
+                                    <div [ngClass]="{'gsi-required-field': career?.isActive}">
+                                        {{"Display_On_Website_Starting" | localize}}
+                                    </div>
+                                    <div>
+                                        <input type="text" id="publishDate" name="publishDate"
+                                            class="form-control form-control-solid ml-3" #publishDate="ngModel"
+                                            placeholder="" bsDatepicker [bsConfig]="datePickerConfig"
+                                            datePickerLuxonModifier [date]="career?.publishDate"
+                                            [datesEnabled]="enabledDates" [disabled]="!career?.isActive"
+                                            [required]="career?.isActive"
+                                            [ngModel]="career?.publishDate?.toString() | date:dateFormat"
+                                            (ngModelChange)="career ? career.publishDate=$event : null">
+                                        <validation-messages [formCtrl]="publishDate"></validation-messages>
+                                    </div>
+                                </label>
+                                <label class="radio radio-accent radio-primary d-flex align-items-center mb-8">
+                                    <input type="radio" name="isActive" [checked]="career?.isActive"
+                                        [ngModel]="career?.isActive" [value]="false"
+                                        (ngModelChange)="career ? career.isActive=$event : null">
+                                    <span></span>
+                                    <div>{{"Save_For_Later" | localize}}</div>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-center">
+                    <button type="button" class="btn btn-light-primary" (click)="showDiscardChangesModal()">
+                        {{"Cancel" | localize}}
+                    </button>
+                    <app-save-button className="btn btn-primary" text="{{'Save' | localize}}"
+                        (onClickEvent)="saveCareer()" #saveButton [disabled]="!careerForm.form.valid">
+                    </app-save-button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<goddard-confirmation-modal #discardChangesModal (accept)="discardChanges()" (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges" [useDefaultsForType]="true" [title]="l('DiscardChanges')"
+    [messageBody]="l('DiscardChangesConfirmation')">
+</goddard-confirmation-modal>
+<!--Discard Modal -->

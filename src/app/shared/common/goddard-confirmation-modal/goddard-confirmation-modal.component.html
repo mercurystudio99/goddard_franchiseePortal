@@ -1,0 +1,27 @@
+<div appBsModal #discardChangesModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}">
+    <div class="gsi-confirmation-modal modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header justify-content-end pt-9 px-9 pb-0 border-0">
+                <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="cancel('close')"></button>
+            </div>
+            <div class="modal-body text-center  pt-0 pr-10 pl-10">
+               <i [class]="icon+ ' text-'+ color +' gsi-confirmation-modal__icon font-weight-bold'"></i>
+                <h3 [class]="'text-'+ color + ' text-capitalize font-ramona mb-4'">
+                    <span>{{title}} </span>
+                </h3>
+                <div class="text-center text-dark">{{messageBody}}</div>
+
+            </div>
+            <div class="modal-footer justify-content-center text-center">
+                 <button *ngIf="cancelButtonText" type="button" class="btn btn-tertiary" (click)="cancel('cancel')">
+                    {{ cancelButtonText }}
+                </button>
+                <button type="button" class="btn btn-primary text-capitalize font-weight-bolder" (click)="confirm()">
+                    {{ okButtonText }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Discard Modal -->

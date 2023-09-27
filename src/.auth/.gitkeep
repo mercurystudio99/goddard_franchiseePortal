@@ -1,0 +1,3 @@
+directory to test out sso auth
+
+you can put a 'me' file here with the information from 'https://franchiseeportal-dev-useast-app.azurewebsites.net/.auth/me'

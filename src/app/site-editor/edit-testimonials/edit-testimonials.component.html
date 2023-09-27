@@ -1,0 +1,26 @@
+<div [@routerTransition]>
+    <div class="container pt-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            {{"Edit School Testimonials" | localize}}
+                        </h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <nav class="nav nav-pills">
+                            <a routerLink="/app/site-editor/edit-testimonials/published" class="nav-link" routerLinkActive="active">
+                                {{"Published" | localize}}
+                            </a>
+                            <a routerLink="/app/site-editor/edit-testimonials/unpublished" class="nav-link" routerLinkActive="active">
+                                {{"Unpublished" | localize}}
+                            </a>
+                        </nav>
+                        <router-outlet></router-outlet>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+ </div>

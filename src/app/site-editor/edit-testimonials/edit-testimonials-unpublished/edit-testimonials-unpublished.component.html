@@ -1,0 +1,45 @@
+<div class="container-fluid py-8" *ngIf="testimonials">
+    <p-table class="gsi-table" #dataTablTestimonials [value]="testimonials">
+        <ng-template pTemplate="header">
+            <tr>
+                <th pSortableColumn="children">Child(ren) <p-sortIcon field="code"></p-sortIcon>
+                </th>
+                <th pSortableColumn="parent">Parent <br> <small>Relationship</small>
+                    <p-sortIcon field="code"></p-sortIcon>
+                </th>
+                <th pSortableColumn="content" class="content-cell">Content <p-sortIcon field="code"></p-sortIcon>
+                </th>
+
+                <th class="options-cell"></th>
+
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-testimonial let-index="rowIndex">
+            <tr [pReorderableRow]="index">
+                <td>
+                    <span class="p-column-title">{{"Children" | localize}}</span>
+                    {{testimonial.children}}
+                </td>
+                <td>
+                    <span class="p-column-title">{{"Parent" | localize}}</span>
+                    {{testimonial.parent}} | <small>{{testimonial.relationship}}</small>
+                </td>
+                <td>
+                    <span class="p-column-title">{{"Content" | localize}}</span>
+                    {{(testimonial.content?.length > maxContentLength)
+                    ? (testimonial.content | slice:0:maxContentLength) + '...'
+                    : (testimonial.content)}}
+                </td>
+
+                <td class="text-right" (click)="showEditModal(testimonial.systinoSurveyResponseId)">
+                    <button [ngClass]="['btn btn-sm btn-success']">
+                        <span class="d-flex">
+                            <span>{{"Publish" | localize}}</span>
+                        </span>
+                    </button>
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</div>
+<edit-testimonial-modal #editTestimonialModal (save)="onSaveTestimonial($event)"></edit-testimonial-modal>

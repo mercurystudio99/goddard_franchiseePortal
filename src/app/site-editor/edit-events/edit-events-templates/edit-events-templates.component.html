@@ -1,0 +1,59 @@
+<div [@routerTransition]>
+    <div class="container-fluid py-8">
+        <div class="row">
+            <div class="col-12">
+                <p-table class="gsi-table" #dataTableEventTemplate [value]="_eventTemplates">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th class="content-cell">
+                                {{"Events Name" | localize}}
+                            </th>
+                            <th>
+                                {{"Description" | localize}}
+                            </th>
+                            <th>
+                                {{"Icon" | localize}}
+                            </th>
+                            <th class="options-cell"></th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-eventTemplate let-index="rowIndex">
+                        <tr [pReorderableRow]="index">
+                            <td>
+                                <span class="p-column-title">{{"Events Name" | localize}}</span>
+                                {{eventTemplate.name}}
+                            </td>
+                            <td [innerHTML]="(eventTemplate.publicWebsiteDescription?.length > maxDescriptionLength)
+                                ? (eventTemplate.publicWebsiteDescription | slice:0:maxDescriptionLength) + '...'
+                                : (eventTemplate.publicWebsiteDescription)">
+                                <span class="p-column-title"> {{"Description" | localize}} </span>
+                            </td>
+                            <td>
+                                <span class="p-column-title">{{"Icon" | localize}} </span>
+                                <!-- {{eventTemplate.iconFileName}} -->
+                                <img [src]="findIconUrlByName(eventTemplate.iconFileName)">
+                            </td>
+
+                            <td class="text-right">
+                                <button class="btn btn-sm btn-primary" (click)="openModal(eventTemplate.id)">
+                                    <goddard-icons [iconClass]="['gsi-icon_white']" [iconSize]="[20]"
+                                        [iconName]="['Outline-Pencil']">
+                                    </goddard-icons>
+                                </button>
+
+                                <button class="btn btn-sm btn-secondary" (click)="onDelete(eventTemplate.id)">
+                                    <goddard-icons [iconClass]="['gsi-icon_white']" [iconSize]="[20]"
+                                        [iconName]="['Outline-Trash']"></goddard-icons>
+                                </button>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<event-template-modal #EventTemplateModal (save)="onSaveEventTemplate($event)"></event-template-modal>
+<!--Edit Modal -->

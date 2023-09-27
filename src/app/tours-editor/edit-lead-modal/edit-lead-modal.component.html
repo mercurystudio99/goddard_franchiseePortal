@@ -1,0 +1,272 @@
+<!--Editing Trigger-->
+<div appBsModal #EditLeadModal="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true"
+    [config]="{backdrop: 'static'}" id="gsi-edit-lead-modal">
+    <div class="modal-dialog modal-dialog-centered  modal-lg">
+        <div class="modal-content">
+            <form #leadForm="ngForm" novalidate (ngSubmit)="saveLead()">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{"New Lead" | localize}}
+                    </h5>
+                    <button type="button" class="close" [attr.aria-label]="l('Close')" (click)="close()"></button>
+                </div>
+                <div #newLeadForm class="w-100">
+                    <div class="modal-body">
+                        <span role="button" type="button" class="d-flex align-items-center bg-white border-0 gsi-text-blue cursor-pointer mb-4"
+                            [attr.aria-label]="l('Back')" (click)="backToLeadSearch()">
+                            <img src="/assets/metronic/themes/theme7/images/icon-circle-right-blue.svg"
+                                class="gsi-link-icon small mr-2 gsi-flip-x"> {{"Back to Search" | localize}}
+                        </span>
+                        <div class="form-row">
+                            <div class="form-group col-12 col-lg-6">
+                                <label class="gsi-required-field" for="first-name">
+                                    {{"First Name" | localize}}
+                                </label>
+                                <input class="form-control" type="text" id="first-name"
+                                    name="first-name" #leadFirstName="ngModel" [ngModel]="lead?.firstName"
+                                    (ngModelChange)="lead ? lead.firstName=$event : null" required
+                                    [maxlength]="50" placeholder='{{"First Name" | localize}}'>
+                                <validation-messages [formCtrl]="leadFirstName"></validation-messages>
+                            </div>
+                            <!--First Name-->
+                            <div class="form-group col-12 col-lg-6">
+                                <label class="gsi-required-field" for="last-name">
+                                    {{"Last Name" | localize}}
+                                </label>
+                                <input class="form-control" type="text" id="last-name"
+                                    name="last-name" #leadLastName="ngModel" [ngModel]="lead?.lastName"
+                                    (ngModelChange)="lead ? lead.lastName=$event : null" required
+                                    [maxlength]="50" (change)="onLastNameChanged()" placeholder='{{"Last Name" | localize}}'>
+                                <validation-messages [formCtrl]="leadLastName"></validation-messages>
+                            </div>
+                            <!--Last Name-->
+                        </div>
+                        <!--Name-->
+                        <div class="form-row">
+                            <div class="form-group col-12 col-lg-6">
+                                <label class="gsi-required-field" for="email">
+                                    {{"Email Address" | localize}}
+                                </label>
+                                <input class="form-control" type="email" id="email"
+                                    name="email" #leadEmailAddress="ngModel" [ngModel]="lead?.emailAddress"
+                                    (ngModelChange)="lead ? lead.emailAddress=$event : null" required
+                                    [maxlength]="50" [email]="true" placeholder='{{"Email Address" | localize}}'>
+                                <validation-messages [formCtrl]="leadEmailAddress"></validation-messages>
+                            </div>
+                            <!--Email-->
+                            <div class="form-group col-12 col-lg-6">
+                                <label class="gsi-required-field" for="phone">
+                                    {{"Phone Number" | localize}}
+                                </label>
+                                <p-inputMask
+                                    #leadMobilePhone="ngModel"
+                                    styleClass="form-control"
+                                    [ngModel]="lead?.mobilePhone"
+                                    (ngModelChange)="lead ? lead.mobilePhone=$event : null"
+                                    mask="(999) 999-9999"
+                                    inputId="phone"
+                                    name="phone"
+                                    placeholder="(999) 999-9999"
+                                    required
+                                    [maxlength]="50"
+                                    type="text"></p-inputMask>
+                                <validation-messages [formCtrl]="leadMobilePhone"></validation-messages>
+                            </div>
+                            <!--Phone-->
+                        </div>
+                        <!--Email / Phone-->
+                        <div class="form-row">
+                            <div class="form-group col-12 col-lg-6">
+                                <label class="gsi-required-field" for="star-date">
+                                    {{"Preferred Start Date" | localize}}
+                                </label>
+                                <input class="form-control gsi-datepicker-form-control"
+                                    type="star-date" id="star-date" name="star-date" #leadStartDate="ngModel"
+                                    [ngModel]="lead?.startDate"
+                                    (ngModelChange)="lead ? lead.startDate=$event : null" bsDatepicker
+                                    [container]="'#gsi-edit-lead-modal'" placeholder='MM/DD/YYYY' required>
+                                <validation-messages [formCtrl]="leadStartDate"></validation-messages>
+                            </div>
+                            <div class="form-group col-12 col-lg-6">
+                                <label class="gsi-required-field" for="zip-code">
+                                    {{"Zip Code" | localize}}
+                                </label>
+                                <input class="form-control " type="zip-code" id="zip-code"
+                                    name="zip-code" #leadZipCode="ngModel" [ngModel]="lead?.zipCode"
+                                    (ngModelChange)="lead ? lead.zipCode=$event : null" required
+                                    [maxlength]="9" placeholder="12345">
+                                <validation-messages [formCtrl]="leadZipCode"></validation-messages>
+                            </div>
+                        </div>
+                        <!--Start Date-->
+                        <div *ngIf="lead?.schoolChildLeads">
+                            <div
+                                *ngFor="let child of lead.schoolChildLeads;  index as i; trackBy: trackSchoolChildLeadsFn">
+                                <div class="w-100 mb-3">
+                                    <div class="w-100 d-flex justify-content-end pb-2" *ngIf="i != 0"
+                                        (click)="removeChild(i)">
+                                        <span role="button" class="text-secondary small cursor-pointer"> Remove
+                                            Child <i aria-hidden="true" class="ki  small  ki-close "></i></span>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div class="form-group col-12 col-lg-6 mb-0">
+                                            <label class="gsi-required-field line-height-sm" for="child[{{i}}].dateOfBirth">
+                                                {{"Birthdate of Child Enrolling" | localize}}
+                                                <br>
+                                                <span class="small font-italic">
+                                                    {{"Or estimated date, if expecting" | localize}}
+                                                </span>
+                                            </label>
+                                            <input
+                                                class="form-control gsi-datepicker-form-control"
+                                                type="text" id="child[{{i}}].dateOfBirth"
+                                                name="child[{{i}}].dateOfBirth" bsDatepicker
+                                                [maxDate]="maxDateOfBirth" [ngModel]="child?.dateOfBirth"
+                                                [container]="'#gsi-edit-lead-modal'"
+                                                (ngModelChange)="child ? child.dateOfBirth=$event : null"
+                                                placeholder='MM/DD/YYYY'
+                                                #dateOfBirth="ngModel" required>
+                                            <validation-messages [formCtrl]="dateOfBirth"
+                                                [hidden]="!dateOfBirth.touched">
+                                            </validation-messages>
+                                        </div>
+                                        <!--child's age-->
+                                        <div class="form-group col-12 col-lg-6 mb-0">
+                                            <label class="justify-content-start pb-2" for="child[{{i}}].firstName">
+                                                {{"Child's Name" | localize}}
+                                            </label>
+                                            <input class="form-control" type="text"
+                                                id="child[{{i}}].firstName" name="child[{{i}}].firstName"
+                                                [ngModel]="child?.firstName"
+                                                (ngModelChange)="child ? child.firstName=$event : null"
+                                                #firstName="ngModel" placeholder='{{"First Name" | localize}}'>
+                                            <validation-messages [formCtrl]="firstName"
+                                                [hidden]="!firstName.touched">
+                                            </validation-messages>
+                                        </div>
+                                        <!--child's name-->
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!--children-->
+                        <div class="w-100 mb-4 d-flex justify-content-end">
+                            <span role="button"
+                                class="bg-white border-0 gsi-text-blue cursor-pointer d-flex align-items-center justify-content-center"
+                                (click)="addChild()">
+                                <goddard-icons [iconClass]="['gsi-text-blue mr-2']" [iconSize]="[20]"
+                                    [iconName]="['Outline-Plus']">
+                                </goddard-icons>
+                                {{"Add Another Child" | localize}}
+                            </span>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-12">
+                                <label class="gsi-required-field">
+                                    {{"Contact Preference" | localize}}
+                                </label>
+                                <div class="form-box w-100 d-flex flex-wrap justify-content-start ">
+                                    <label class="checkbox checkbox-lg mr-5">
+                                        <input type="radio" name="contactPreference"
+                                            [value]="contactPreference.Phone" #leadContactPreference="ngModel"
+                                            [ngModel]="lead?.contactPreference"
+                                            (ngModelChange)="lead ? lead.contactPreference=$event : null"
+                                            [checked]="lead && lead.contactPreference === contactPreference.Phone"
+                                            required />
+                                        <span></span> {{"Phone" | localize}}
+                                    </label>
+
+                                    <label class="checkbox checkbox-lg">
+                                        <input type="radio" name="contactPreference"
+                                            [value]="contactPreference.Email" #leadContactPreference="ngModel"
+                                            [ngModel]="lead?.contactPreference"
+                                            (ngModelChange)="lead ? lead.contactPreference=$event : null"
+                                            [checked]="lead && lead.contactPreference === contactPreference.Email"
+                                            required />
+                                        <span></span> {{"Email" | localize}}
+                                    </label>
+                                </div>
+                                <validation-messages [formCtrl]="leadContactPreference"></validation-messages>
+
+                            </div>
+                        </div>
+                        <!--Days of Interest-->
+                        <div class="form-row">
+                            <div class="form-group col-12">
+                                <label for="special-requests">
+                                    {{"Special Requests" | localize}}
+                                </label>
+                                <textarea class="form-control" type="special-requests"
+                                    id="special-requests" name="special-requests" #additionalRemarks="ngModel"
+                                    rows="3" [ngModel]="lead?.additionalRemarks"
+                                    (ngModelChange)="lead ? lead.additionalRemarks=$event : null">
+                                </textarea>
+                                <validation-messages [formCtrl]="additionalRemarks"></validation-messages>
+                            </div>
+                        </div>
+                        <!--Lead's Special Request-->
+                        <div class="form-row">
+                            <div class="form-group col-12">
+                                <label for="programs-of-interest">
+                                    {{"Programs of Interest" | localize}}
+                                </label>
+                                <div class="form-box w-100 w-100 d-flex flex-wrap pb-0">
+                                    <label class="checkbox checkbox-lg col-6 col-lg-4 col-xl-3 mb-5"
+                                        *ngFor="let option of leadProgramOfInterestOptions">
+                                        <input type="checkbox" name="programsOfInterest-{{option.name}}"
+                                            [checked]="isProgramOfInterestSelected(option.name)"
+                                            programsOfInterest [lead]="lead"
+                                            [programsOfInterestOptions]="programsOfInterestOptions"
+                                            [value]="option.name" />
+                                        <span></span>{{option.displayName | localize}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Program of Interest-->
+                        <div class="form-row">
+                            <div class="form-group col-12 mb-0">
+                                <label for="special-requests">
+                                    {{"Days of Interest" | localize}}
+                                </label>
+                                <div
+                                    class="form-box w-10 d-flex flex-wrap pb-0">
+                                    <label class="checkbox checkbox-lg mr-5 mb-5"
+                                        *ngFor="let option of daysOfInterest">
+                                        <input type="checkbox" name="daysOfInterest-{{option.value}}"
+                                            id="daysOfInterest-{{option.value}}" [value]="option.value"
+                                            [checked]="dayOfInterestSelected(option.value)" daysOfInterest
+                                            [lead]="lead">
+                                        <span></span> {{option.text | localize}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Days of Interest-->
+                    </div>
+                    <!--New Lead Form-->
+
+                    <div class="modal-footer  justify-content-end">
+                        <button type="button" class="btn btn-outline-lighter-primary" (click)="showDiscardChangesModal()">
+                            {{"Cancel" | localize}}
+                        </button>
+                        <div>
+                            <button type="button" class="btn btn-primary" (click)="saveLead()">
+                                {{"Save" | localize}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<goddard-confirmation-modal #discardChangesModal (accept)="discardChanges()" (reject)="closeDiscardChangesModal()"
+    [modalType]="modalType.DiscardChanges" [useDefaultsForType]="true" >
+</goddard-confirmation-modal>
+<!--Discard Modal -->

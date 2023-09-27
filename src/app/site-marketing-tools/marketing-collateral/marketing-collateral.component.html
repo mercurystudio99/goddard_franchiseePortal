@@ -1,0 +1,12 @@
+<div [@routerTransition]>
+    <div class="gsi-preview-container container px-0">
+        <div class="position-relative rounded bg-white my-5 p-2">
+            <site-marketing-tools-page-preview
+             [disableAnchors]="false"
+             pageId="marketing-collateral.html"
+             #pagePreview
+             (iframeIsResized)="setEditors($event)">
+            </site-marketing-tools-page-preview>
+        </div>
+    </div>
+</div>
